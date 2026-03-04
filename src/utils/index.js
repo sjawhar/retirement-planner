@@ -1,4 +1,4 @@
-export { calcFederalTax, getMarginalRate, calcSSTaxable, getStandardDeduction } from "./federalTax";
+export { calcFederalTax, getMarginalRate, calcSSTaxable, getStandardDeduction, calcCapitalGainsTax } from "./federalTax";
 export { calcStateTax } from "./stateTax";
 export { calcIRMAA } from "./irmaa";
 export { calcRMD } from "./rmd";

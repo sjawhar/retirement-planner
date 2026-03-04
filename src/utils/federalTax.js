@@ -1,6 +1,8 @@
 import {
   BRACKETS_SINGLE,
   BRACKETS_MFJ,
+  LTCG_BRACKETS_SINGLE,
+  LTCG_BRACKETS_MFJ,
   STANDARD_DEDUCTION,
   AGE_65_DEDUCTION,
   SS_PROVISIONAL_THRESHOLDS,
@@ -86,4 +88,32 @@ export function getStandardDeduction(filing, age, spouseAge = 0) {
   }
 
   return deduction;
+}
+
+/**
+ * Calculate long-term capital gains tax using stacking method.
+ * Capital gains are taxed at 0%/15%/20% based on total taxable income.
+ * Gains "stack" on top of ordinary taxable income.
+ * @param {number} gain - Capital gain amount
+ * @param {number} ordinaryTaxableIncome - Taxable income from ordinary sources
+ * @param {string} filing - "single" or "mfj"
+ * @returns {number} Capital gains tax owed
+ */
+export function calcCapitalGainsTax(gain, ordinaryTaxableIncome, filing) {
+  if (gain <= 0) return 0;
+  const brackets = filing === "mfj" ? LTCG_BRACKETS_MFJ : LTCG_BRACKETS_SINGLE;
+  // Capital gains stack on top of ordinary income
+  const base = ordinaryTaxableIncome;
+  let tax = 0;
+  let remaining = gain;
+
+  for (const bracket of brackets) {
+    if (base >= bracket.max) continue;
+    const taxable = Math.min(remaining, Math.max(0, bracket.max - Math.max(base, 0)));
+    tax += taxable * bracket.rate;
+    remaining -= taxable;
+    if (remaining <= 0) break;
+  }
+
+  return tax;
 }

@@ -8,6 +8,7 @@ import {
   calcIRMAA,
   calcRMD,
   calcSSBenefit,
+  calcCapitalGainsTax,
 } from "../utils";
 
 /**
@@ -69,15 +70,16 @@ export function runProjection(inputs) {
     const traditionalWithdrawal = rmd + rothConversion;
 
     // ─── Tax calculations ───────────────────────────────────────
-    const nonSSIncome = pension + traditionalWithdrawal + investmentIncome + homeSale;
-    const ssTaxable = calcSSTaxable(ss, nonSSIncome, filing);
-    const agi = nonSSIncome + ssTaxable;
-    const taxableIncome = Math.max(0, agi - stdDed);
-    const federalTax = calcFederalTax(taxableIncome, filing);
-    const taxWithoutConversion = rothConversion > 0
-      ? calcFederalTax(Math.max(0, agi - rothConversion - stdDed), filing)
-      : federalTax;
-    const conversionTaxCost = federalTax - taxWithoutConversion;
+    // Separate ordinary income from home sale gain (taxed at LTCG rates)
+    const ordinaryIncome = pension + traditionalWithdrawal + investmentIncome;
+    // Home sale gain still counts toward provisional income for SS taxation
+    const ssTaxable = calcSSTaxable(ss, ordinaryIncome + homeSale, filing);
+    const agi = ordinaryIncome + homeSale + ssTaxable;
+    const ordinaryTaxable = Math.max(0, ordinaryIncome + ssTaxable - stdDed);
+    const ordinaryFedTax = calcFederalTax(ordinaryTaxable, filing);
+    const homeSaleTax = calcCapitalGainsTax(homeSale, ordinaryTaxable, filing);
+    const federalTax = ordinaryFedTax + homeSaleTax;
+    const taxableIncome = ordinaryTaxable; // used for marginal rate lookup
     const marginalRate = getMarginalRate(taxableIncome, filing);
     const irmaaAge = age - 2;
     const irmaaYearData = years.find(y => y.age === irmaaAge);
