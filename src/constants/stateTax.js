@@ -209,10 +209,4 @@ export default STATE_TAX_PROFILES;
 export const STATE_NAMES = Object.keys(STATE_TAX_PROFILES).sort();
 
 // Default states to compare in the State Comparison tab
-export const DEFAULT_COMPARE_STATES = [
-  "Pennsylvania",
-  "Florida",
-  "Texas",
-  "North Carolina",
-  "Georgia",
-];
+export const DEFAULT_COMPARE_STATES = ["Pennsylvania", "Florida", "Texas", "North Carolina", "Georgia"];

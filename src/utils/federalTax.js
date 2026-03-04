@@ -52,8 +52,7 @@ export function getMarginalRate(taxableIncome, filing) {
 export function calcSSTaxable(ssIncome, otherAGI, filing) {
   if (ssIncome <= 0) return 0;
 
-  const thresholds =
-    SS_PROVISIONAL_THRESHOLDS[filing === "mfj" ? "mfj" : "single"];
+  const thresholds = SS_PROVISIONAL_THRESHOLDS[filing === "mfj" ? "mfj" : "single"];
   const provisionalIncome = otherAGI + ssIncome * 0.5;
 
   let taxable = 0;
@@ -62,15 +61,11 @@ export function calcSSTaxable(ssIncome, otherAGI, filing) {
     // Up to 85% taxable
     taxable = Math.min(
       0.85 * ssIncome,
-      0.85 * (provisionalIncome - thresholds.upper) +
-        0.5 * (thresholds.upper - thresholds.lower)
+      0.85 * (provisionalIncome - thresholds.upper) + 0.5 * (thresholds.upper - thresholds.lower),
     );
   } else if (provisionalIncome > thresholds.lower) {
     // Up to 50% taxable
-    taxable = Math.min(
-      0.5 * ssIncome,
-      0.5 * (provisionalIncome - thresholds.lower)
-    );
+    taxable = Math.min(0.5 * ssIncome, 0.5 * (provisionalIncome - thresholds.lower));
   }
 
   return Math.max(0, Math.min(taxable, 0.85 * ssIncome));
@@ -83,10 +78,7 @@ export function getStandardDeduction(filing, age, spouseAge = 0) {
   let deduction = STANDARD_DEDUCTION[filing === "mfj" ? "mfj" : "single"];
 
   if (age >= 65) {
-    deduction +=
-      filing === "mfj"
-        ? AGE_65_DEDUCTION.mfj_per_spouse
-        : AGE_65_DEDUCTION.single;
+    deduction += filing === "mfj" ? AGE_65_DEDUCTION.mfj_per_spouse : AGE_65_DEDUCTION.single;
   }
 
   if (filing === "mfj" && spouseAge >= 65) {

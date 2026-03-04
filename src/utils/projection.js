@@ -38,12 +38,7 @@ export function runProjection(inputs) {
     conversionStrategy,
   } = inputs;
 
-  const conversionTarget =
-    conversionStrategy === "fill12"
-      ? 0.12
-      : conversionStrategy === "fill22"
-      ? 0.22
-      : 0;
+  const conversionTarget = conversionStrategy === "fill12" ? 0.12 : conversionStrategy === "fill22" ? 0.22 : 0;
 
   const annualSS = calcSSBenefit(ssPIA * 12, ssClaimAge);
   const brackets = filing === "mfj" ? BRACKETS_MFJ : BRACKETS_SINGLE;
@@ -61,15 +56,11 @@ export function runProjection(inputs) {
     // ─── Roth conversion: fill target bracket ───────────────────
     const stdDed = getStandardDeduction(filing, age, spAge);
     const baseIncome = pension + investmentIncome + homeSale;
-    const baseTaxable = Math.max(
-      0,
-      baseIncome + calcSSTaxable(ss, baseIncome, filing) - stdDed
-    );
+    const baseTaxable = Math.max(0, baseIncome + calcSSTaxable(ss, baseIncome, filing) - stdDed);
 
     let conversionRoom = 0;
     if (conversionTarget > 0 && tradBal > rmd) {
-      const targetBracket =
-        brackets.find((b) => b.rate === conversionTarget) || brackets[1];
+      const targetBracket = brackets.find((b) => b.rate === conversionTarget) || brackets[1];
       conversionRoom = Math.max(0, targetBracket.max - baseTaxable - rmd);
       conversionRoom = Math.min(conversionRoom, tradBal - rmd);
     }
@@ -78,34 +69,22 @@ export function runProjection(inputs) {
     const traditionalWithdrawal = rmd + rothConversion;
 
     // ─── Tax calculations ───────────────────────────────────────
-    const nonSSIncome =
-      pension + traditionalWithdrawal + investmentIncome + homeSale;
+    const nonSSIncome = pension + traditionalWithdrawal + investmentIncome + homeSale;
     const ssTaxable = calcSSTaxable(ss, nonSSIncome, filing);
     const agi = nonSSIncome + ssTaxable;
     const taxableIncome = Math.max(0, agi - stdDed);
     const federalTax = calcFederalTax(taxableIncome, filing);
     const marginalRate = getMarginalRate(taxableIncome, filing);
     const irmaa = age >= 65 ? calcIRMAA(agi, filing) : 0;
-    const stateTax = calcStateTax(
-      selectedState,
-      pension,
-      ss,
-      rmd,
-      investmentIncome + homeSale,
-      age
-    );
+    const stateTax = calcStateTax(selectedState, pension, ss, rmd, investmentIncome + homeSale, age);
 
     // ─── Roth withdrawal to cover living expenses ───────────────
-    const afterTaxFromOtherSources =
-      pension + ss + rmd + investmentIncome - federalTax - stateTax - irmaa;
+    const afterTaxFromOtherSources = pension + ss + rmd + investmentIncome - federalTax - stateTax - irmaa;
     const rothWithdrawal = Math.max(0, livingExpenses - afterTaxFromOtherSources);
 
     // ─── Update balances ────────────────────────────────────────
     tradBal = Math.max(0, (tradBal - traditionalWithdrawal) * (1 + ANNUAL_GROWTH_RATE));
-    rothBal = Math.max(
-      0,
-      (rothBal - rothWithdrawal + rothConversion) * (1 + ANNUAL_GROWTH_RATE)
-    );
+    rothBal = Math.max(0, (rothBal - rothWithdrawal + rothConversion) * (1 + ANNUAL_GROWTH_RATE));
 
     const totalTax = federalTax + stateTax + irmaa;
 
@@ -146,8 +125,7 @@ export function summarizeProjection(projection) {
   const totalStateTax = projection.reduce((s, y) => s + y.stateTax, 0);
   const totalIRMAA = projection.reduce((s, y) => s + y.irmaa, 0);
   const totalConversions = projection.reduce((s, y) => s + y.rothConversion, 0);
-  const avgEffectiveRate =
-    projection.reduce((s, y) => s + y.effectiveRate, 0) / projection.length;
+  const avgEffectiveRate = projection.reduce((s, y) => s + y.effectiveRate, 0) / projection.length;
 
   return {
     totalFederalTax,

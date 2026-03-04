@@ -13,9 +13,7 @@ export function readStateFromURL() {
   for (const [shortKey, fullKey] of Object.entries(PARAM_MAP)) {
     const rawValue = params.get(shortKey);
     if (rawValue != null) {
-      values[fullKey] = NUMERIC_FIELDS.has(fullKey)
-        ? Number(rawValue)
-        : rawValue;
+      values[fullKey] = NUMERIC_FIELDS.has(fullKey) ? Number(rawValue) : rawValue;
     }
   }
 
@@ -40,11 +38,7 @@ export function buildShareURL(state) {
   }
 
   const queryString = params.toString();
-  return (
-    window.location.origin +
-    window.location.pathname +
-    (queryString ? "?" + queryString : "")
-  );
+  return window.location.origin + window.location.pathname + (queryString ? "?" + queryString : "");
 }
 
 /**

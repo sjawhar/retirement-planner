@@ -1,8 +1,4 @@
-import {
-  IRMAA_THRESHOLDS_MFJ,
-  IRMAA_THRESHOLDS_SINGLE,
-  IRMAA_ANNUAL_SURCHARGE,
-} from "../constants";
+import { IRMAA_THRESHOLDS_MFJ, IRMAA_THRESHOLDS_SINGLE, IRMAA_ANNUAL_SURCHARGE } from "../constants";
 
 /**
  * Calculate annual IRMAA surcharge based on MAGI.
@@ -14,8 +10,7 @@ import {
  * @returns {number} Annual IRMAA surcharge (total for household)
  */
 export function calcIRMAA(magi, filing) {
-  const thresholds =
-    filing === "mfj" ? IRMAA_THRESHOLDS_MFJ : IRMAA_THRESHOLDS_SINGLE;
+  const thresholds = filing === "mfj" ? IRMAA_THRESHOLDS_MFJ : IRMAA_THRESHOLDS_SINGLE;
   const multiplier = filing === "mfj" ? 2 : 1;
 
   for (let i = thresholds.length - 1; i >= 0; i--) {

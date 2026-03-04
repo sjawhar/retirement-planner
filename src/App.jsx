@@ -36,7 +36,7 @@ export default function App() {
       },
       () => {
         prompt("Copy this URL to share your scenario:", url);
-      }
+      },
     );
   }, [inputs]);
 
@@ -65,9 +65,13 @@ export default function App() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
             style={{
-              width: 36, height: 36, borderRadius: 9,
+              width: 36,
+              height: 36,
+              borderRadius: 9,
               background: "rgba(255,255,255,0.15)",
-              display: "flex", alignItems: "center", justifyContent: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               fontSize: 19,
             }}
           >
@@ -87,9 +91,17 @@ export default function App() {
           <button
             onClick={handleShare}
             style={{
-              background: "rgba(255,255,255,0.15)", border: "none", color: "#fff",
-              padding: "7px 14px", borderRadius: 8, cursor: "pointer",
-              fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 5,
+              background: "rgba(255,255,255,0.15)",
+              border: "none",
+              color: "#fff",
+              padding: "7px 14px",
+              borderRadius: 8,
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
             }}
           >
             📋 Share This Scenario
@@ -100,7 +112,10 @@ export default function App() {
               background: "rgba(255,255,255,0.08)",
               border: "1px solid rgba(255,255,255,0.2)",
               color: "rgba(255,255,255,0.7)",
-              padding: "7px 14px", borderRadius: 8, cursor: "pointer", fontSize: 12,
+              padding: "7px 14px",
+              borderRadius: 8,
+              cursor: "pointer",
+              fontSize: 12,
             }}
           >
             Reset Defaults
@@ -108,8 +123,13 @@ export default function App() {
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             style={{
-              background: "rgba(255,255,255,0.15)", border: "none", color: "#fff",
-              padding: "7px 14px", borderRadius: 8, cursor: "pointer", fontSize: 12,
+              background: "rgba(255,255,255,0.15)",
+              border: "none",
+              color: "#fff",
+              padding: "7px 14px",
+              borderRadius: 8,
+              cursor: "pointer",
+              fontSize: 12,
             }}
           >
             {sidebarOpen ? "◀ Hide" : "▶ Inputs"}
@@ -123,10 +143,15 @@ export default function App() {
           <div
             className="sidebar no-print"
             style={{
-              width: 275, minWidth: 255, background: "#fff",
-              borderRight: "1px solid #e2e8f0", padding: "16px 14px",
-              overflowY: "auto", height: "calc(100vh - 66px)",
-              fontSize: 13, flexShrink: 0,
+              width: 275,
+              minWidth: 255,
+              background: "#fff",
+              borderRight: "1px solid #e2e8f0",
+              padding: "16px 14px",
+              overflowY: "auto",
+              height: "calc(100vh - 66px)",
+              fontSize: 13,
+              flexShrink: 0,
             }}
           >
             <Sidebar state={inputs} onChange={setInputs} />
@@ -137,19 +162,35 @@ export default function App() {
         <div
           className="main-content"
           style={{
-            flex: 1, minWidth: 0, padding: "16px 20px",
-            overflowY: "auto", height: "calc(100vh - 66px)",
+            flex: 1,
+            minWidth: 0,
+            padding: "16px 20px",
+            overflowY: "auto",
+            height: "calc(100vh - 66px)",
           }}
         >
           {/* Summary cards */}
           <div className="summary-cards" style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-            <Card title="Lifetime Fed Tax" value={fmt(summary.totalFederalTax)} subtitle={`Ages ${inputs.retireAge}–92`} />
-            <Card title="Lifetime State Tax" value={fmt(summary.totalStateTax)} subtitle={inputs.selectedState} color="#059669" />
+            <Card
+              title="Lifetime Fed Tax"
+              value={fmt(summary.totalFederalTax)}
+              subtitle={`Ages ${inputs.retireAge}–92`}
+            />
+            <Card
+              title="Lifetime State Tax"
+              value={fmt(summary.totalStateTax)}
+              subtitle={inputs.selectedState}
+              color="#059669"
+            />
             <Card title="Avg Effective Rate" value={fmtPct(summary.avgEffectiveRate)} color="#7c3aed" />
             <Card
               title="Total Roth Conversions"
               value={fmt(summary.totalConversions)}
-              subtitle={inputs.conversionStrategy === "none" ? "None" : `Fill ${inputs.conversionStrategy === "fill12" ? "12%" : "22%"}`}
+              subtitle={
+                inputs.conversionStrategy === "none"
+                  ? "None"
+                  : `Fill ${inputs.conversionStrategy === "fill12" ? "12%" : "22%"}`
+              }
               color="#d97706"
             />
           </div>
@@ -158,14 +199,27 @@ export default function App() {
           <div
             className="tab-bar no-print"
             style={{
-              display: "flex", gap: 4, marginBottom: 16,
-              background: "#f1f5f9", padding: 4, borderRadius: 10, overflowX: "auto",
+              display: "flex",
+              gap: 4,
+              marginBottom: 16,
+              background: "#f1f5f9",
+              padding: 4,
+              borderRadius: 10,
+              overflowX: "auto",
             }}
           >
-            <TabButton active={tab === "yearplan"} onClick={() => setTab("yearplan")} icon="📅">Year-by-Year</TabButton>
-            <TabButton active={tab === "roth"} onClick={() => setTab("roth")} icon="🔄">Roth Optimizer</TabButton>
-            <TabButton active={tab === "states"} onClick={() => setTab("states")} icon="🗺️">State Compare</TabButton>
-            <TabButton active={tab === "ss"} onClick={() => setTab("ss")} icon="🏦">SS Timing</TabButton>
+            <TabButton active={tab === "yearplan"} onClick={() => setTab("yearplan")} icon="📅">
+              Year-by-Year
+            </TabButton>
+            <TabButton active={tab === "roth"} onClick={() => setTab("roth")} icon="🔄">
+              Roth Optimizer
+            </TabButton>
+            <TabButton active={tab === "states"} onClick={() => setTab("states")} icon="🗺️">
+              State Compare
+            </TabButton>
+            <TabButton active={tab === "ss"} onClick={() => setTab("ss")} icon="🏦">
+              SS Timing
+            </TabButton>
           </div>
 
           {/* Active tab */}
@@ -185,14 +239,18 @@ export default function App() {
           {/* Disclaimer */}
           <div
             style={{
-              marginTop: 20, padding: 12, background: "#f1f5f9",
-              borderRadius: 10, fontSize: 10, color: "#94a3b8", lineHeight: 1.6,
+              marginTop: 20,
+              padding: 12,
+              background: "#f1f5f9",
+              borderRadius: 10,
+              fontSize: 10,
+              color: "#94a3b8",
+              lineHeight: 1.6,
             }}
           >
-            <strong>Disclaimer:</strong> This tool provides estimates for educational planning purposes
-            only — not financial, tax, or legal advice. Projections assume 5% annual TSP growth and 2025
-            tax brackets. State tax models are simplified. Consult a qualified financial planner or CPA for
-            personalized advice.
+            <strong>Disclaimer:</strong> This tool provides estimates for educational planning purposes only — not
+            financial, tax, or legal advice. Projections assume 5% annual TSP growth and 2025 tax brackets. State tax
+            models are simplified. Consult a qualified financial planner or CPA for personalized advice.
           </div>
         </div>
       </div>
