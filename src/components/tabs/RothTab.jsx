@@ -8,15 +8,28 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
 
   return (
     <div>
-      <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 12, padding: 13, marginBottom: 16, fontSize: 13, lineHeight: 1.6 }}>
+      <div
+        style={{
+          background: "#fffbeb",
+          border: "1px solid #fde68a",
+          borderRadius: 12,
+          padding: 13,
+          marginBottom: 16,
+          fontSize: 13,
+          lineHeight: 1.6,
+        }}
+      >
         {conversionStrategy === "none" ? (
           <span>No Roth conversions — change strategy in sidebar to see potential savings.</span>
         ) : (
           <span>
-            <strong>Strategy:</strong> Converting traditional savings to Roth at low tax rates before Social Security and RMDs stack up.
+            <strong>Strategy:</strong> Converting traditional savings to Roth at low tax rates before Social Security
+            and RMDs stack up.
             {summary.taxSavingsVsBaseline > 0 && (
               <span style={{ color: "#059669", fontWeight: 600 }}>
-                {" "}This saves an estimated <strong>{fmt(summary.taxSavingsVsBaseline)}</strong> in lifetime taxes vs. no conversions.
+                {" "}
+                This saves an estimated <strong>{fmt(summary.taxSavingsVsBaseline)}</strong> in lifetime taxes vs. no
+                conversions.
               </span>
             )}
           </span>
@@ -25,15 +38,49 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
 
       {conversionStrategy !== "none" && (
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-          <div style={{ flex: 1, minWidth: 200, background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 12, padding: 14 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#dc2626", marginBottom: 8, textTransform: "uppercase" }}>Without Optimization</div>
-            <div style={{ fontSize: 13, color: "#475569" }}>Lifetime Tax: <strong>{fmt((summary.totalAllTax || 0) + (summary.taxSavingsVsBaseline || 0))}</strong></div>
-            <div style={{ fontSize: 13, color: "#475569" }}>Savings Last To: <strong>{summary.depletionAge ? `Age ${summary.depletionAge}` : "92+"}</strong></div>
+          <div
+            style={{
+              flex: 1,
+              minWidth: 200,
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: 12,
+              padding: 14,
+            }}
+          >
+            <div
+              style={{ fontSize: 11, fontWeight: 700, color: "#dc2626", marginBottom: 8, textTransform: "uppercase" }}
+            >
+              Without Optimization
+            </div>
+            <div style={{ fontSize: 13, color: "#475569" }}>
+              Lifetime Tax: <strong>{fmt((summary.totalAllTax || 0) + (summary.taxSavingsVsBaseline || 0))}</strong>
+            </div>
+            <div style={{ fontSize: 13, color: "#475569" }}>
+              Savings Last To: <strong>{summary.depletionAge ? `Age ${summary.depletionAge}` : "92+"}</strong>
+            </div>
           </div>
-          <div style={{ flex: 1, minWidth: 200, background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, padding: 14 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#16a34a", marginBottom: 8, textTransform: "uppercase" }}>With Roth Conversions</div>
-            <div style={{ fontSize: 13, color: "#475569" }}>Lifetime Tax: <strong>{fmt(summary.totalAllTax || 0)}</strong></div>
-            <div style={{ fontSize: 13, color: "#475569" }}>Savings Last To: <strong>{summary.depletionAge ? `Age ${summary.depletionAge}` : "92+"}</strong></div>
+          <div
+            style={{
+              flex: 1,
+              minWidth: 200,
+              background: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              borderRadius: 12,
+              padding: 14,
+            }}
+          >
+            <div
+              style={{ fontSize: 11, fontWeight: 700, color: "#16a34a", marginBottom: 8, textTransform: "uppercase" }}
+            >
+              With Roth Conversions
+            </div>
+            <div style={{ fontSize: 13, color: "#475569" }}>
+              Lifetime Tax: <strong>{fmt(summary.totalAllTax || 0)}</strong>
+            </div>
+            <div style={{ fontSize: 13, color: "#475569" }}>
+              Savings Last To: <strong>{summary.depletionAge ? `Age ${summary.depletionAge}` : "92+"}</strong>
+            </div>
           </div>
         </div>
       )}

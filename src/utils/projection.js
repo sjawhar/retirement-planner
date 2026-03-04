@@ -1,4 +1,11 @@
-import { BRACKETS_SINGLE, BRACKETS_MFJ, ANNUAL_GROWTH_RATE, MAX_PROJECTION_AGE, MEDICARE_START_AGE, MEDICARE_MONTHLY_COST } from "../constants";
+import {
+  BRACKETS_SINGLE,
+  BRACKETS_MFJ,
+  ANNUAL_GROWTH_RATE,
+  MAX_PROJECTION_AGE,
+  MEDICARE_START_AGE,
+  MEDICARE_MONTHLY_COST,
+} from "../constants";
 import {
   calcFederalTax,
   getMarginalRate,
@@ -66,7 +73,7 @@ export function runProjection(inputs) {
     // ─── Health insurance cost ──────────────────────────────────
     // Each spouse transitions to Medicare at their own age 65
     const primaryMedicare = age >= MEDICARE_START_AGE;
-    const spouseMedicare = (spouseAge + (age - currentAge)) >= MEDICARE_START_AGE;
+    const spouseMedicare = spouseAge + (age - currentAge) >= MEDICARE_START_AGE;
 
     let annualHealthCost;
     if (primaryMedicare && spouseMedicare) {
@@ -110,14 +117,13 @@ export function runProjection(inputs) {
     const ordinaryFedTax = calcFederalTax(ordinaryTaxable, filing);
     const homeSaleTax = calcCapitalGainsTax(homeSale, ordinaryTaxable, filing);
     const federalTax = ordinaryFedTax + homeSaleTax;
-    const taxWithoutConversion = rothConversion > 0
-      ? calcFederalTax(Math.max(0, ordinaryTaxable - rothConversion), filing)
-      : federalTax;
+    const taxWithoutConversion =
+      rothConversion > 0 ? calcFederalTax(Math.max(0, ordinaryTaxable - rothConversion), filing) : federalTax;
     const conversionTaxCost = federalTax - taxWithoutConversion;
     const taxableIncome = ordinaryTaxable; // used for marginal rate lookup
     const marginalRate = getMarginalRate(taxableIncome, filing);
     const irmaaAge = age - 2;
-    const irmaaYearData = years.find(y => y.age === irmaaAge);
+    const irmaaYearData = years.find((y) => y.age === irmaaAge);
     const irmaaIncome = irmaaYearData ? irmaaYearData.agi : agi;
     const irmaa = age >= 65 ? calcIRMAA(irmaaIncome, filing) : 0;
     const stateTax = calcStateTax(selectedState, annualPension, totalSS, rmd, investmentIncome + homeSale, age);
@@ -186,15 +192,13 @@ export function summarizeProjection(projection, inputs) {
   const totalConversions = projection.reduce((s, y) => s + y.rothConversion, 0);
   const avgEffectiveRate = projection.reduce((s, y) => s + y.effectiveRate, 0) / projection.length;
 
-  const depletionYear = projection.find(y => y.savingsDepleted);
+  const depletionYear = projection.find((y) => y.savingsDepleted);
   const depletionAge = depletionYear ? depletionYear.age : null;
 
   const retirementYear = projection[0];
   const retirementMonthlyIncome = retirementYear ? retirementYear.netMonthlyIncome : 0;
 
-  const totalHealthInsuranceCost = projection
-    .filter(y => y.age < 65)
-    .reduce((s, y) => s + y.annualHealthCost, 0);
+  const totalHealthInsuranceCost = projection.filter((y) => y.age < 65).reduce((s, y) => s + y.annualHealthCost, 0);
 
   // Tax savings vs no-conversion baseline
   const baselineProjection = runProjection({ ...inputs, conversionStrategy: "none" });

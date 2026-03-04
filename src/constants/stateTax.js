@@ -23,7 +23,8 @@ const STATE_TAX_PROFILES = {
     ssExempt: true,
     tspExempt: true,
     label: "No income tax",
-    residencyNotes: "No income tax. Homestead exemption available. Popular for part-time residents establishing domicile.",
+    residencyNotes:
+      "No income tax. Homestead exemption available. Popular for part-time residents establishing domicile.",
   },
   Nevada: {
     rate: 0,
@@ -61,7 +62,8 @@ const STATE_TAX_PROFILES = {
     ssExempt: true,
     tspExempt: true,
     label: "No income tax",
-    residencyNotes: "No income tax. No homestead exemption for non-residents. Driver's license + voter registration establishes domicile.",
+    residencyNotes:
+      "No income tax. No homestead exemption for non-residents. Driver's license + voter registration establishes domicile.",
   },
   Washington: {
     rate: 0,

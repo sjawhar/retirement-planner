@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import { fmt, fmtPct } from "../../utils";
+import { fmt } from "../../utils";
 
 export default function YearPlanTab({ projection, ssClaimAge }) {
   return (
@@ -27,14 +27,51 @@ export default function YearPlanTab({ projection, ssClaimAge }) {
             <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => "$" + (v / 1000).toFixed(0) + "k"} />
             <Tooltip formatter={(v, n) => [fmt(v), n]} labelFormatter={(l) => "Age " + l} />
             <Legend wrapperStyle={{ fontSize: 10 }} />
-            <ReferenceLine x={ssClaimAge} stroke="#3b82f6" strokeDasharray="3 3" label={{ value: "SS", position: "insideTopLeft", fill: "#3b82f6", fontSize: 10 }} />
-            <ReferenceLine x={65} stroke="#10b981" strokeDasharray="3 3" label={{ value: "Medicare", position: "insideTopLeft", fill: "#10b981", fontSize: 10 }} />
-            <ReferenceLine x={73} stroke="#f59e0b" strokeDasharray="3 3" label={{ value: "RMDs", position: "insideTopLeft", fill: "#f59e0b", fontSize: 10 }} />
+            <ReferenceLine
+              x={ssClaimAge}
+              stroke="#3b82f6"
+              strokeDasharray="3 3"
+              label={{ value: "SS", position: "insideTopLeft", fill: "#3b82f6", fontSize: 10 }}
+            />
+            <ReferenceLine
+              x={65}
+              stroke="#10b981"
+              strokeDasharray="3 3"
+              label={{ value: "Medicare", position: "insideTopLeft", fill: "#10b981", fontSize: 10 }}
+            />
+            <ReferenceLine
+              x={73}
+              stroke="#f59e0b"
+              strokeDasharray="3 3"
+              label={{ value: "RMDs", position: "insideTopLeft", fill: "#f59e0b", fontSize: 10 }}
+            />
             <Area type="monotone" dataKey="annualPension" name="Pension" stackId="a" fill="#3b82f6" stroke="#2563eb" />
-            <Area type="monotone" dataKey="totalSS" name="Social Security" stackId="a" fill="#10b981" stroke="#059669" />
+            <Area
+              type="monotone"
+              dataKey="totalSS"
+              name="Social Security"
+              stackId="a"
+              fill="#10b981"
+              stroke="#059669"
+            />
             <Area type="monotone" dataKey="rmd" name="RMD" stackId="a" fill="#f59e0b" stroke="#d97706" />
-            <Area type="monotone" dataKey="rothWithdrawal" name="Roth Draw" stackId="a" fill="#8b5cf6" stroke="#7c3aed" />
-            <Line type="monotone" dataKey="totalExpenses" name="Total Expenses" stroke="#ef4444" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+            <Area
+              type="monotone"
+              dataKey="rothWithdrawal"
+              name="Roth Draw"
+              stackId="a"
+              fill="#8b5cf6"
+              stroke="#7c3aed"
+            />
+            <Line
+              type="monotone"
+              dataKey="totalExpenses"
+              name="Total Expenses"
+              stroke="#ef4444"
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={false}
+            />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -43,16 +80,29 @@ export default function YearPlanTab({ projection, ssClaimAge }) {
       <div style={{ background: "#fff", borderRadius: 12, padding: 16, border: "1px solid #e2e8f0", marginBottom: 16 }}>
         <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700 }}>Account Balances</h3>
         <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={projection.map(y => ({ ...y, totalNetWorth: y.tradBal + y.rothBal }))}>
+          <LineChart data={projection.map((y) => ({ ...y, totalNetWorth: y.tradBal + y.rothBal }))}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis dataKey="age" tick={{ fontSize: 10 }} />
             <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => "$" + (v / 1000).toFixed(0) + "k"} />
             <Tooltip formatter={(v, n) => [fmt(v), n]} labelFormatter={(l) => "Age " + l} />
             <Legend wrapperStyle={{ fontSize: 10 }} />
-            {projection.find(y => y.savingsDepleted) && (
-              <ReferenceLine x={projection.find(y => y.savingsDepleted).age} stroke="#ef4444" strokeDasharray="3 3" label={{ value: "Savings depleted", position: "insideTopRight", fill: "#ef4444", fontSize: 10 }} />
+            {projection.find((y) => y.savingsDepleted) && (
+              <ReferenceLine
+                x={projection.find((y) => y.savingsDepleted).age}
+                stroke="#ef4444"
+                strokeDasharray="3 3"
+                label={{ value: "Savings depleted", position: "insideTopRight", fill: "#ef4444", fontSize: 10 }}
+              />
             )}
-            <Line type="monotone" dataKey="totalNetWorth" name="Total Net Worth" stroke="#64748b" strokeWidth={2} strokeDasharray="3 3" dot={false} />
+            <Line
+              type="monotone"
+              dataKey="totalNetWorth"
+              name="Total Net Worth"
+              stroke="#64748b"
+              strokeWidth={2}
+              strokeDasharray="3 3"
+              dot={false}
+            />
             <Line type="monotone" dataKey="tradBal" name="Traditional" stroke="#ef4444" strokeWidth={2} dot={false} />
             <Line type="monotone" dataKey="rothBal" name="Roth" stroke="#22c55e" strokeWidth={2} dot={false} />
           </LineChart>
@@ -109,7 +159,9 @@ export default function YearPlanTab({ projection, ssClaimAge }) {
               >
                 <td style={{ padding: "4px", fontWeight: 700, textAlign: "center" }}>{y.age}</td>
                 <td style={{ padding: "4px", textAlign: "right" }}>{fmt(y.annualPension || y.pension)}</td>
-                <td style={{ padding: "4px", textAlign: "right", color: (y.totalSS || y.ss) > 0 ? "#059669" : "#d1d5db" }}>
+                <td
+                  style={{ padding: "4px", textAlign: "right", color: (y.totalSS || y.ss) > 0 ? "#059669" : "#d1d5db" }}
+                >
                   {fmt(y.totalSS || y.ss)}
                 </td>
                 <td style={{ padding: "4px", textAlign: "right", color: y.spouseSS > 0 ? "#059669" : "#d1d5db" }}>
@@ -130,10 +182,19 @@ export default function YearPlanTab({ projection, ssClaimAge }) {
                 <td style={{ padding: "4px", textAlign: "right", color: y.irmaa > 0 ? "#dc2626" : "#d1d5db" }}>
                   {fmt(y.irmaa)}
                 </td>
-                <td style={{ padding: "4px", textAlign: "right", color: y.annualHealthCost > 0 ? "#dc2626" : "#d1d5db" }}>
+                <td
+                  style={{ padding: "4px", textAlign: "right", color: y.annualHealthCost > 0 ? "#dc2626" : "#d1d5db" }}
+                >
                   {fmt(y.annualHealthCost)}
                 </td>
-                <td style={{ padding: "4px", textAlign: "right", fontWeight: 600, color: y.netMonthlyIncome < 0 ? "#dc2626" : "#059669" }}>
+                <td
+                  style={{
+                    padding: "4px",
+                    textAlign: "right",
+                    fontWeight: 600,
+                    color: y.netMonthlyIncome < 0 ? "#dc2626" : "#059669",
+                  }}
+                >
                   {fmt(y.netMonthlyIncome)}
                 </td>
                 <td style={{ padding: "4px", textAlign: "right", color: "#475569" }}>{fmt(y.tradBal)}</td>

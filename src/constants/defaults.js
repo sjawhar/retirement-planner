@@ -4,22 +4,22 @@ export const DEFAULTS = {
   retireAge: 60,
   spouseAge: 56,
   filing: "mfj",
-  monthlyPension: 850,       // renamed from pension, now monthly
-  spousePension: 800,        // monthly
+  monthlyPension: 850, // renamed from pension, now monthly
+  spousePension: 800, // monthly
   tspTraditional: 600000,
   tspRoth: 100000,
   ssPIA: 2400,
   ssClaimAge: 67,
-  spouseSsPIA: 0,            // monthly PIA
+  spouseSsPIA: 0, // monthly PIA
   spouseSsClaimAge: 67,
   homeSaleGain: 0,
   homeSaleYear: 62,
   investmentIncome: 5000,
-  monthlySpending: 5000,     // renamed from livingExpenses, now monthly
-  selectedState: "Utah",     // changed from Virginia
+  monthlySpending: 5000, // renamed from livingExpenses, now monthly
+  selectedState: "Utah", // changed from Virginia
   conversionStrategy: "fill12",
   healthInsurance: "fehb",
-  healthInsuranceCost: 800,  // monthly
+  healthInsuranceCost: 800, // monthly
   inflationRate: 0.025,
 };
 
@@ -30,7 +30,7 @@ export const PARAM_MAP = {
   r: "retireAge",
   s: "spouseAge",
   f: "filing",
-  p: "monthlyPension",      // was: pension
+  p: "monthlyPension", // was: pension
   sp2: "spousePension",
   tt: "tspTraditional",
   tr: "tspRoth",
@@ -41,7 +41,7 @@ export const PARAM_MAP = {
   hg: "homeSaleGain",
   hy: "homeSaleYear",
   ii: "investmentIncome",
-  ms: "monthlySpending",    // was: le (livingExpenses)
+  ms: "monthlySpending", // was: le (livingExpenses)
   st: "selectedState",
   cs: "conversionStrategy",
   hi: "healthInsurance",

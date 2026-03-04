@@ -23,7 +23,7 @@ export function InputGroup({ label, children, hint }) {
 }
 
 export function SliderInput({ value, onChange, min, max, step = 1, prefix = "$", suffix = "", formatValue }) {
-  const displayValue = formatValue ? formatValue(value) : (typeof value === "number" ? value.toLocaleString() : value);
+  const displayValue = formatValue ? formatValue(value) : typeof value === "number" ? value.toLocaleString() : value;
   return (
     <div>
       <div

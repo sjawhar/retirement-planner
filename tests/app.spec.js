@@ -6,8 +6,8 @@ const BASE = "/retirement-planner/";
 test.describe("App loads and renders", () => {
   test("page title and header", async ({ page }) => {
     await page.goto(BASE);
-    await expect(page).toHaveTitle("Federal Retirement Tax Planner");
-    await expect(page.locator("h1")).toHaveText("Federal Retirement Tax Planner");
+    await expect(page).toHaveTitle("Federal Retirement Readiness Planner");
+    await expect(page.locator("h1")).toHaveText("Federal Retirement Readiness Planner");
     await expect(page.locator(".header-sub")).toContainText("FERS · TSP · Social Security");
   });
 
@@ -30,12 +30,12 @@ test.describe("App loads and renders", () => {
 
     // Check section titles
     await expect(sidebar).toContainText("Your Situation");
-    await expect(sidebar).toContainText("Income Sources");
-    await expect(sidebar).toContainText("Planning");
+    await expect(sidebar).toContainText("Your Income");
+    await expect(sidebar).toContainText("Strategy");
 
     // Check key inputs exist
-    await expect(sidebar.locator("select")).toHaveCount(3); // Filing, State, Roth Strategy
-    await expect(sidebar.locator('input[type="range"]')).toHaveCount(11); // All sliders (MFJ has spouse age)
+    await expect(sidebar.locator("select")).toHaveCount(4); // Filing, Health Insurance, State, Roth Strategy
+    await expect(sidebar.locator('input[type="range"]')).toHaveCount(16); // All sliders (MFJ has spouse fields)
   });
 
   test("no console errors on load", async ({ page }) => {
@@ -178,11 +178,11 @@ test.describe("Sidebar interactions", () => {
     await expect(page.locator("text=Strategy:")).toBeVisible();
 
     // Change to none
-    await page.locator("select").nth(2).selectOption("none");
+    await page.locator("select").nth(3).selectOption("none");
     await expect(page.getByText("No Roth conversions —")).toBeVisible();
 
     // Change to fill22
-    await page.locator("select").nth(2).selectOption("fill22");
+    await page.locator("select").nth(3).selectOption("fill22");
     await expect(page.locator("text=Strategy:")).toBeVisible();
   });
 
@@ -191,7 +191,7 @@ test.describe("Sidebar interactions", () => {
     await expect(page.locator("text=Sale at Age")).not.toBeVisible();
 
     // Set home sale gain > 0 by manipulating the slider
-    const homeSaleSlider = page.locator('input[type="range"]').nth(9);
+    const homeSaleSlider = page.locator('input[type="range"]').nth(12);
     await homeSaleSlider.fill("100000");
     await expect(page.locator("text=Sale at Age")).toBeVisible();
   });
@@ -219,30 +219,28 @@ test.describe("URL parameters", () => {
     expect(filing).toBe("mfj");
 
     // Check state default
-    const state = await page.locator("select").nth(1).inputValue();
-    expect(state).toBe("Virginia");
+    const state = await page.locator("select").nth(2).inputValue();
+    expect(state).toBe("Utah");
   });
 
   test("loads custom values from URL params", async ({ page }) => {
-    await page.goto(`${BASE}?p=65000&tt=800000&sc=70&st=Florida&f=single`);
+    await page.goto(`${BASE}?p=3000&tt=800000&sc=70&st=Florida&f=single`);
 
     // Filing
     const filing = await page.locator("select").first().inputValue();
     expect(filing).toBe("single");
 
     // State
-    const state = await page.locator("select").nth(1).inputValue();
+    const state = await page.locator("select").nth(2).inputValue();
     expect(state).toBe("Florida");
 
-    // Pension (slider 2 for single filer — no spouse age slider)
+    // Single filer sliders: currentAge(0), retireAge(1), pension(2), tspTrad(3), tspRoth(4), ssPIA(5), ssClaimAge(6)...
     const pension = await page.locator('input[type="range"]').nth(2).inputValue();
-    expect(pension).toBe("65000");
+    expect(pension).toBe("3000");
 
-    // TSP Traditional (slider 3 for single)
     const tsp = await page.locator('input[type="range"]').nth(3).inputValue();
     expect(tsp).toBe("800000");
 
-    // SS Claim Age (slider 6 for single)
     const ssAge = await page.locator('input[type="range"]').nth(6).inputValue();
     expect(ssAge).toBe("70");
   });
@@ -251,7 +249,7 @@ test.describe("URL parameters", () => {
     await page.goto(BASE);
 
     // Change state to Florida
-    await page.locator("select").nth(1).selectOption("Florida");
+    await page.locator("select").nth(2).selectOption("Florida");
     await page.waitForTimeout(300);
 
     const url = page.url();
@@ -266,13 +264,13 @@ test.describe("URL parameters", () => {
     expect(new URL(defaultUrl).search).toBe("");
 
     // Change one value
-    await page.locator("select").nth(1).selectOption("Pennsylvania");
+    await page.locator("select").nth(2).selectOption("Pennsylvania");
     await page.waitForTimeout(300);
 
     const updatedUrl = page.url();
     expect(updatedUrl).toContain("st=Pennsylvania");
     // Other defaults should not be in URL
-    expect(updatedUrl).not.toContain("p=50000");
+    expect(updatedUrl).not.toContain("p=850");
     expect(updatedUrl).not.toContain("f=mfj");
   });
 });
@@ -289,14 +287,14 @@ test.describe("Calculations sanity checks", () => {
 
   test("higher pension increases monthly income", async ({ page }) => {
     // Low pension
-    await page.goto(`${BASE}?p=20000`);
+    await page.goto(`${BASE}?p=500`);
     const lowPensionCard = page.locator(".summary-cards > div").nth(1);
     const lowPensionText = await lowPensionCard.textContent();
     const lowPensionMatch = lowPensionText.match(/\$([\d,]+)/);
     const lowIncome = parseInt(lowPensionMatch[1].replace(/,/g, ""));
 
     // High pension
-    await page.goto(`${BASE}?p=120000`);
+    await page.goto(`${BASE}?p=5000`);
     const highPensionCard = page.locator(".summary-cards > div").nth(1);
     const highPensionText = await highPensionCard.textContent();
     const highPensionMatch = highPensionText.match(/\$([\d,]+)/);
@@ -375,10 +373,10 @@ test.describe("Responsive and UI features", () => {
   });
 
   test("reset defaults restores initial values", async ({ page }) => {
-    await page.goto(`${BASE}?p=100000&st=Florida`);
+    await page.goto(`${BASE}?p=3000&st=Florida`);
 
     // Verify non-default values loaded
-    const state = await page.locator("select").nth(1).inputValue();
+    const state = await page.locator("select").nth(2).inputValue();
     expect(state).toBe("Florida");
 
     // Click Reset Defaults
@@ -386,8 +384,8 @@ test.describe("Responsive and UI features", () => {
     await page.waitForTimeout(300);
 
     // Verify defaults restored
-    const resetState = await page.locator("select").nth(1).inputValue();
-    expect(resetState).toBe("Virginia");
+    const resetState = await page.locator("select").nth(2).inputValue();
+    expect(resetState).toBe("Utah");
 
     // URL should be clean
     expect(new URL(page.url()).search).toBe("");

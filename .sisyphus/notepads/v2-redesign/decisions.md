@@ -1,0 +1,3 @@
+- Updated README to reflect v2's shift from a tax optimizer to a retirement readiness tool.
+- Included health insurance and inflation-adjusted spending as core features in the documentation.
+- Documented all new URL parameters to ensure shareability remains a key feature.

@@ -239,7 +239,7 @@ The core loop in `projection.js` needs these changes:
 3. **Health insurance expense** modeled per-spouse. Each spouse has their own
    Medicare start at age 65. Before 65, use the selected insurance type and
    cost. After the primary retiree hits 65, cost drops to Medicare rates for
-   them; the spouse's cost drops when *they* hit 65 (based on spouse's age).
+   them; the spouse's cost drops when _they_ hit 65 (based on spouse's age).
 4. **Inflation adjustment** applied to spending each year (not to pension —
    FERS COLA is separate and smaller than general inflation, but modeling it
    precisely is out of scope; using the same rate is close enough)
@@ -278,7 +278,7 @@ The core loop in `projection.js` needs these changes:
 - WEP/GPO (relevant for CSRS, not FERS)
 - Part-time work income during retirement
 - FERS COLA modeling (using general inflation rate as approximation)
-These can be added later if needed. The tool should be useful without them.
+  These can be added later if needed. The tool should be useful without them.
 
 ## Success Criteria
 

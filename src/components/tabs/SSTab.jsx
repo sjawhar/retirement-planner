@@ -17,10 +17,7 @@ const COLORS = ["#ef4444", "#f59e0b", "#2563eb", "#22c55e"];
 
 export default function SSTab({ ssPIA, ssClaimAge, spouseSsPIA, spouseSsClaimAge }) {
   const ssTimingData = useMemo(() => generateSSTimingData(ssPIA), [ssPIA]);
-  const spouseTimingData = useMemo(
-    () => (spouseSsPIA > 0 ? generateSSTimingData(spouseSsPIA) : null),
-    [spouseSsPIA]
-  );
+  const spouseTimingData = useMemo(() => (spouseSsPIA > 0 ? generateSSTimingData(spouseSsPIA) : null), [spouseSsPIA]);
 
   return (
     <div>
@@ -40,11 +37,19 @@ export default function SSTab({ ssPIA, ssClaimAge, spouseSsPIA, spouseSsClaimAge
       </div>
 
       {spouseSsPIA > 0 && (
-        <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, padding: 14, marginBottom: 16 }}>
+        <div
+          style={{
+            background: "#f0fdf4",
+            border: "1px solid #bbf7d0",
+            borderRadius: 12,
+            padding: 14,
+            marginBottom: 16,
+          }}
+        >
           <h3 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700, color: "#16a34a" }}>Combined Household SS</h3>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {ssTimingData.map((primary) => {
-              const spouseAtSameAge = spouseTimingData?.find(s => s.claimAge === spouseSsClaimAge);
+              const spouseAtSameAge = spouseTimingData?.find((s) => s.claimAge === spouseSsClaimAge);
               const combined = primary.monthly + (spouseAtSameAge?.monthly || 0);
               return (
                 <div key={primary.claimAge} style={{ flex: 1, minWidth: 120, textAlign: "center" }}>
@@ -56,7 +61,8 @@ export default function SSTab({ ssPIA, ssClaimAge, spouseSsPIA, spouseSsClaimAge
             })}
           </div>
           <div style={{ fontSize: 11, color: "#64748b", marginTop: 8 }}>
-            Spouse claims at {spouseSsClaimAge} · ${spouseTimingData?.find(s => s.claimAge === spouseSsClaimAge)?.monthly?.toLocaleString() || 0}/mo
+            Spouse claims at {spouseSsClaimAge} · $
+            {spouseTimingData?.find((s) => s.claimAge === spouseSsClaimAge)?.monthly?.toLocaleString() || 0}/mo
           </div>
         </div>
       )}

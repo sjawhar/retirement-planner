@@ -1,0 +1,3 @@
+- README should lead with the primary user goal (retirement readiness) rather than technical implementation (tax optimization).
+- URL parameters are a powerful way to share state in client-side apps without a backend.
+- Separating constants from logic makes annual updates much simpler for maintainers.

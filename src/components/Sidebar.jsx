@@ -89,7 +89,14 @@ export default function Sidebar({ state, onChange }) {
           </InputGroup>
 
           <InputGroup label="Spouse's SS Claim Age">
-            <SliderInput value={state.spouseSsClaimAge} onChange={set("spouseSsClaimAge")} min={62} max={70} prefix="" suffix=" yrs" />
+            <SliderInput
+              value={state.spouseSsClaimAge}
+              onChange={set("spouseSsClaimAge")}
+              min={62}
+              max={70}
+              prefix=""
+              suffix=" yrs"
+            />
           </InputGroup>
         </>
       )}
@@ -142,7 +149,11 @@ export default function Sidebar({ state, onChange }) {
       </InputGroup>
 
       <InputGroup label="Health Insurance">
-        <select value={state.healthInsurance} onChange={(e) => set("healthInsurance")(e.target.value)} style={selectStyle}>
+        <select
+          value={state.healthInsurance}
+          onChange={(e) => set("healthInsurance")(e.target.value)}
+          style={selectStyle}
+        >
           <option value="fehb">FEHB (Federal Employee Health Benefits)</option>
           <option value="aca">ACA Marketplace</option>
           <option value="employer">Spouse's Employer Plan</option>
@@ -151,11 +162,25 @@ export default function Sidebar({ state, onChange }) {
       </InputGroup>
 
       <InputGroup label="Monthly Insurance Cost" hint="Household total">
-        <SliderInput value={state.healthInsuranceCost} onChange={set("healthInsuranceCost")} min={0} max={3000} step={50} />
+        <SliderInput
+          value={state.healthInsuranceCost}
+          onChange={set("healthInsuranceCost")}
+          min={0}
+          max={3000}
+          step={50}
+        />
       </InputGroup>
 
       <InputGroup label="Inflation Rate">
-        <SliderInput value={state.inflationRate} onChange={set("inflationRate")} min={0} max={0.05} step={0.005} suffix="%" formatValue={(v) => (v * 100).toFixed(1)} />
+        <SliderInput
+          value={state.inflationRate}
+          onChange={set("inflationRate")}
+          min={0}
+          max={0.05}
+          step={0.005}
+          suffix="%"
+          formatValue={(v) => (v * 100).toFixed(1)}
+        />
       </InputGroup>
 
       <SectionTitle>Strategy</SectionTitle>

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { DEFAULTS } from "./constants";
-import { readStateFromURL, buildShareURL, syncURLToState, fmt, fmtPct } from "./utils";
+import { readStateFromURL, buildShareURL, syncURLToState, fmt } from "./utils";
 import { runProjection, summarizeProjection } from "./utils/projection";
 import Sidebar from "./components/Sidebar";
 import { TabButton, Card, Toast } from "./components/ui";
@@ -79,7 +79,7 @@ export default function App() {
           </div>
           <div>
             <h1 className="header-title" style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
-              Federal Retirement Tax Planner
+              Federal Retirement Readiness Planner
             </h1>
             <p className="header-sub" style={{ margin: 0, fontSize: 11, opacity: 0.7 }}>
               FERS · TSP · Social Security · Home Sale · State Taxes
@@ -191,9 +191,11 @@ export default function App() {
             <Card
               title="Tax Optimization Saves"
               value={fmt(summary.taxSavingsVsBaseline)}
-              subtitle={inputs.conversionStrategy === "none"
-                ? "Enable Roth strategy"
-                : `Via ${inputs.conversionStrategy === "fill12" ? "12%" : "22%"} fill`}
+              subtitle={
+                inputs.conversionStrategy === "none"
+                  ? "Enable Roth strategy"
+                  : `Via ${inputs.conversionStrategy === "fill12" ? "12%" : "22%"} fill`
+              }
               color="#d97706"
             />
           </div>

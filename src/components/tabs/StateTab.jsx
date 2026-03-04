@@ -13,8 +13,12 @@ export default function StateTab({ state, projection }) {
       let total = 0;
       for (const year of projection) {
         total += calcStateTax(
-          st, year.pension, year.ss, year.traditionalWithdrawal,
-          year.investmentIncome + year.homeSale, year.age,
+          st,
+          year.pension,
+          year.ss,
+          year.traditionalWithdrawal,
+          year.investmentIncome + year.homeSale,
+          year.age,
         );
       }
       const years = projection.length;
@@ -31,7 +35,9 @@ export default function StateTab({ state, projection }) {
     <div>
       {/* Bar chart */}
       <div style={{ background: "#fff", borderRadius: 12, padding: 16, border: "1px solid #e2e8f0", marginBottom: 16 }}>
-        <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700 }}>Lifetime State Tax: Ages {projection[0]?.age}–{projection[projection.length - 1]?.age}</h3>
+        <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700 }}>
+          Lifetime State Tax: Ages {projection[0]?.age}–{projection[projection.length - 1]?.age}
+        </h3>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={stateComparison} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
