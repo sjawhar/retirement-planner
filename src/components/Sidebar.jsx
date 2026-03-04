@@ -62,10 +62,10 @@ export default function Sidebar({ state, onChange }) {
         </InputGroup>
       )}
 
-      <SectionTitle>Income Sources</SectionTitle>
+      <SectionTitle>Your Income</SectionTitle>
 
-      <InputGroup label="FERS Pension (annual)" hint="Estimated annual pension">
-        <SliderInput value={state.pension} onChange={set("pension")} min={10000} max={130000} step={1000} />
+      <InputGroup label="Your Monthly Pension">
+        <SliderInput value={state.monthlyPension} onChange={set("monthlyPension")} min={0} max={5000} step={50} />
       </InputGroup>
 
       <InputGroup label="TSP Traditional Balance">
@@ -75,6 +75,24 @@ export default function Sidebar({ state, onChange }) {
       <InputGroup label="TSP Roth Balance">
         <SliderInput value={state.tspRoth} onChange={set("tspRoth")} min={0} max={750000} step={5000} />
       </InputGroup>
+
+      {state.filing === "mfj" && (
+        <>
+          <SectionTitle>Spouse's Income</SectionTitle>
+
+          <InputGroup label="Spouse's Monthly Pension">
+            <SliderInput value={state.spousePension} onChange={set("spousePension")} min={0} max={5000} step={50} />
+          </InputGroup>
+
+          <InputGroup label="Spouse's SS Estimate (monthly PIA)">
+            <SliderInput value={state.spouseSsPIA} onChange={set("spouseSsPIA")} min={0} max={4800} step={50} />
+          </InputGroup>
+
+          <InputGroup label="Spouse's SS Claim Age">
+            <SliderInput value={state.spouseSsClaimAge} onChange={set("spouseSsClaimAge")} min={62} max={70} prefix="" suffix=" yrs" />
+          </InputGroup>
+        </>
+      )}
 
       <InputGroup label="SS PIA (monthly)" hint="Benefit at full retirement age">
         <SliderInput value={state.ssPIA} onChange={set("ssPIA")} min={0} max={4800} step={50} />
@@ -111,16 +129,35 @@ export default function Sidebar({ state, onChange }) {
         </InputGroup>
       )}
 
-      <SectionTitle>Planning</SectionTitle>
+      <SectionTitle>Strategy</SectionTitle>
 
-      <InputGroup label="Annual Living Expenses">
+      <InputGroup label="Monthly Spending">
         <SliderInput
-          value={state.livingExpenses}
-          onChange={set("livingExpenses")}
-          min={30000}
-          max={220000}
-          step={2000}
+          value={state.monthlySpending}
+          onChange={set("monthlySpending")}
+          min={2000}
+          max={15000}
+          step={100}
         />
+      </InputGroup>
+
+      <SectionTitle>Expenses & Insurance</SectionTitle>
+
+      <InputGroup label="Health Insurance">
+        <select value={state.healthInsurance} onChange={(e) => set("healthInsurance")(e.target.value)} style={selectStyle}>
+          <option value="fehb">FEHB (Federal Employee Health Benefits)</option>
+          <option value="aca">ACA Marketplace</option>
+          <option value="employer">Spouse's Employer Plan</option>
+          <option value="none">No Coverage / Other</option>
+        </select>
+      </InputGroup>
+
+      <InputGroup label="Monthly Insurance Cost" hint="Household total">
+        <SliderInput value={state.healthInsuranceCost} onChange={set("healthInsuranceCost")} min={0} max={3000} step={50} />
+      </InputGroup>
+
+      <InputGroup label="Inflation Rate">
+        <SliderInput value={state.inflationRate} onChange={set("inflationRate")} min={0} max={0.05} step={0.005} suffix="%" formatValue={(v) => (v * 100).toFixed(1)} />
       </InputGroup>
 
       <InputGroup label="Current State">

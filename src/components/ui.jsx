@@ -22,7 +22,8 @@ export function InputGroup({ label, children, hint }) {
   );
 }
 
-export function SliderInput({ value, onChange, min, max, step = 1, prefix = "$", suffix = "" }) {
+export function SliderInput({ value, onChange, min, max, step = 1, prefix = "$", suffix = "", formatValue }) {
+  const displayValue = formatValue ? formatValue(value) : (typeof value === "number" ? value.toLocaleString() : value);
   return (
     <div>
       <div
@@ -35,7 +36,7 @@ export function SliderInput({ value, onChange, min, max, step = 1, prefix = "$",
         }}
       >
         {prefix}
-        {typeof value === "number" ? value.toLocaleString() : value}
+        {displayValue}
         {suffix}
       </div>
       <input
@@ -50,12 +51,12 @@ export function SliderInput({ value, onChange, min, max, step = 1, prefix = "$",
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, color: "#94a3b8" }}>
         <span>
           {prefix}
-          {min.toLocaleString()}
+          {formatValue ? formatValue(min) : min.toLocaleString()}
           {suffix}
         </span>
         <span>
           {prefix}
-          {max.toLocaleString()}
+          {formatValue ? formatValue(max) : max.toLocaleString()}
           {suffix}
         </span>
       </div>
