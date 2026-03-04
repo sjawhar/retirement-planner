@@ -56,7 +56,7 @@ test.describe("App loads and renders", () => {
     // Year-by-Year tab should have recharts SVGs
     const svgs = page.locator("svg");
     const count = await svgs.count();
-    expect(count).toBeGreaterThanOrEqual(2); // Tax burden + account balances charts
+    expect(count).toBeGreaterThanOrEqual(2); // Income vs Expenses + account balances charts
   });
 });
 
@@ -133,11 +133,11 @@ test.describe("Tab navigation", () => {
 
   test("tabs switch content correctly", async ({ page }) => {
     // Start on Year-by-Year
-    await expect(page.locator("text=Tax Burden Over Time")).toBeVisible();
+    await expect(page.locator("text=Income vs Expenses")).toBeVisible();
 
     // Switch to Roth
     await page.getByRole("button", { name: /Roth Optimizer/i }).click();
-    await expect(page.locator("text=Tax Burden Over Time")).not.toBeVisible();
+    await expect(page.locator("text=Income vs Expenses")).not.toBeVisible();
     await expect(page.locator("text=Strategy:")).toBeVisible();
 
     // Switch to States
@@ -152,7 +152,7 @@ test.describe("Tab navigation", () => {
 
     // Back to Year-by-Year
     await page.getByRole("button", { name: /Year-by-Year/i }).click();
-    await expect(page.locator("text=Tax Burden Over Time")).toBeVisible();
+    await expect(page.locator("text=Income vs Expenses")).toBeVisible();
   });
 });
 
