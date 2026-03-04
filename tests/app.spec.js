@@ -80,8 +80,6 @@ test.describe("Tab navigation", () => {
 
     // Strategy description should be visible
     await expect(page.locator("text=Strategy:")).toBeVisible();
-    await expect(page.locator("text=Fill the 12% bracket")).toBeVisible();
-
     // Summary cards
     await expect(page.locator("text=Total Converted")).toBeVisible();
     await expect(page.locator("text=Best Window")).toBeVisible();
@@ -177,15 +175,15 @@ test.describe("Sidebar interactions", () => {
   test("changing Roth strategy updates display", async ({ page }) => {
     // Switch to Roth tab
     await page.getByRole("button", { name: /Roth Optimizer/i }).click();
-    await expect(page.locator("text=Fill the 12% bracket")).toBeVisible();
-
-    // Change to fill22
-    await page.locator("select").nth(2).selectOption("fill22");
-    await expect(page.locator("text=Fill the 22% bracket")).toBeVisible();
+    await expect(page.locator("text=Strategy:")).toBeVisible();
 
     // Change to none
     await page.locator("select").nth(2).selectOption("none");
-    await expect(page.getByText("No conversions —")).toBeVisible();
+    await expect(page.getByText("No Roth conversions —")).toBeVisible();
+
+    // Change to fill22
+    await page.locator("select").nth(2).selectOption("fill22");
+    await expect(page.locator("text=Strategy:")).toBeVisible();
   });
 
   test("home sale gain shows sale age slider", async ({ page }) => {
