@@ -79,6 +79,10 @@ export function runProjection(inputs) {
     const ordinaryFedTax = calcFederalTax(ordinaryTaxable, filing);
     const homeSaleTax = calcCapitalGainsTax(homeSale, ordinaryTaxable, filing);
     const federalTax = ordinaryFedTax + homeSaleTax;
+    const taxWithoutConversion = rothConversion > 0
+      ? calcFederalTax(Math.max(0, ordinaryTaxable - rothConversion), filing)
+      : federalTax;
+    const conversionTaxCost = federalTax - taxWithoutConversion;
     const taxableIncome = ordinaryTaxable; // used for marginal rate lookup
     const marginalRate = getMarginalRate(taxableIncome, filing);
     const irmaaAge = age - 2;
