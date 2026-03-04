@@ -1,22 +1,23 @@
 import React, { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { STATE_TAX_PROFILES, DEFAULT_COMPARE_STATES } from "../../constants";
-import { calcStateTax, calcSSBenefit, fmt } from "../../utils";
+import { calcStateTax, fmt } from "../../utils";
 
-export default function StateTab({ state }) {
-  const { selectedState, pension, ssPIA, ssClaimAge, retireAge, investmentIncome } = state;
+export default function StateTab({ state, projection }) {
+  const { selectedState } = state;
 
   const stateComparison = useMemo(() => {
     const states = [selectedState, ...DEFAULT_COMPARE_STATES.filter((s) => s !== selectedState)];
-    const annualSS = calcSSBenefit(ssPIA * 12, ssClaimAge);
 
     return states.map((st) => {
       let total = 0;
-      for (let age = retireAge; age <= 85; age++) {
-        const ss = age >= ssClaimAge ? annualSS : 0;
-        total += calcStateTax(st, pension, ss, 30000, investmentIncome, age);
+      for (const year of projection) {
+        total += calcStateTax(
+          st, year.pension, year.ss, year.traditionalWithdrawal,
+          year.investmentIncome + year.homeSale, year.age,
+        );
       }
-      const years = 85 - retireAge + 1;
+      const years = projection.length;
       return {
         state: st,
         avgAnnual: Math.round(total / years),
@@ -24,13 +25,13 @@ export default function StateTab({ state }) {
         profile: STATE_TAX_PROFILES[st],
       };
     });
-  }, [selectedState, pension, ssPIA, ssClaimAge, retireAge, investmentIncome]);
+  }, [selectedState, projection]);
 
   return (
     <div>
       {/* Bar chart */}
       <div style={{ background: "#fff", borderRadius: 12, padding: 16, border: "1px solid #e2e8f0", marginBottom: 16 }}>
-        <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700 }}>Lifetime State Tax: Ages {retireAge}–85</h3>
+        <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700 }}>Lifetime State Tax: Ages {projection[0]?.age}–{projection[projection.length - 1]?.age}</h3>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={stateComparison} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />

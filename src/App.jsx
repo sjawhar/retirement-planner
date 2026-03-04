@@ -233,7 +233,7 @@ export default function App() {
               conversionStrategy={inputs.conversionStrategy}
             />
           )}
-          {tab === "states" && <StateTab state={inputs} />}
+          {tab === "states" && <StateTab state={inputs} projection={projection} />}
           {tab === "ss" && <SSTab ssPIA={inputs.ssPIA} ssClaimAge={inputs.ssClaimAge} />}
 
           {/* Disclaimer */}
