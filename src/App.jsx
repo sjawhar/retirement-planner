@@ -24,7 +24,7 @@ export default function App() {
 
   // ─── Core calculations ────────────────────────────────────────────
   const projection = useMemo(() => runProjection(inputs), [inputs]);
-  const summary = useMemo(() => summarizeProjection(projection), [projection]);
+  const summary = useMemo(() => summarizeProjection(projection, inputs), [projection, inputs]);
 
   // ─── Actions ──────────────────────────────────────────────────────
   const handleShare = useCallback(() => {

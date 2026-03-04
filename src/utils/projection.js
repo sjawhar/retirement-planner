@@ -41,6 +41,7 @@ export function runProjection(inputs) {
     selectedState,
     conversionStrategy,
     healthInsuranceCost,
+    inflationRate,
   } = inputs;
 
   const conversionTarget = conversionStrategy === "fill12" ? 0.12 : conversionStrategy === "fill22" ? 0.22 : 0;
@@ -78,6 +79,11 @@ export function runProjection(inputs) {
       // Both on private insurance
       annualHealthCost = healthInsuranceCost * 12;
     }
+
+    // ─── Expenses with inflation ────────────────────────────
+    const yearsFromRetirement = age - retireAge;
+    const inflatedSpending = monthlySpending * 12 * Math.pow(1 + inflationRate, yearsFromRetirement);
+    const totalExpenses = inflatedSpending + annualHealthCost;
 
     // ─── Roth conversion: fill target bracket ───────────────────
     const stdDed = getStandardDeduction(filing, age, spAge);
@@ -117,8 +123,15 @@ export function runProjection(inputs) {
     const stateTax = calcStateTax(selectedState, annualPension, totalSS, rmd, investmentIncome + homeSale, age);
 
     // ─── Roth withdrawal to cover living expenses ───────────────
-    const afterTaxFromOtherSources = annualPension + totalSS + rmd + investmentIncome - federalTax - stateTax - irmaa;
-    const rothWithdrawal = Math.max(0, monthlySpending * 12 - afterTaxFromOtherSources);
+    const totalGrossIncome = annualPension + totalSS + traditionalWithdrawal + investmentIncome + homeSale;
+    const afterTaxIncome = totalGrossIncome - federalTax - stateTax - irmaa;
+    const rothNeeded = Math.max(0, totalExpenses - afterTaxIncome);
+    const rothWithdrawal = Math.min(rothNeeded, rothBal);
+
+    const savingsDepleted = tradBal <= 0 && rothBal <= 0;
+    const netMonthlyIncome = savingsDepleted
+      ? (afterTaxIncome - totalExpenses) / 12
+      : (afterTaxIncome + rothWithdrawal - totalExpenses) / 12;
 
     // ─── Update balances ────────────────────────────────────────
     tradBal = Math.max(0, (tradBal - traditionalWithdrawal) * (1 + ANNUAL_GROWTH_RATE));
@@ -153,6 +166,10 @@ export function runProjection(inputs) {
       conversionRoom,
       conversionTaxCost,
       annualHealthCost,
+      totalExpenses,
+      netMonthlyIncome,
+      savingsDepleted,
+      inflatedSpending,
     });
   }
 
@@ -162,12 +179,28 @@ export function runProjection(inputs) {
 /**
  * Compute summary statistics from a projection.
  */
-export function summarizeProjection(projection) {
+export function summarizeProjection(projection, inputs) {
   const totalFederalTax = projection.reduce((s, y) => s + y.federalTax, 0);
   const totalStateTax = projection.reduce((s, y) => s + y.stateTax, 0);
   const totalIRMAA = projection.reduce((s, y) => s + y.irmaa, 0);
   const totalConversions = projection.reduce((s, y) => s + y.rothConversion, 0);
   const avgEffectiveRate = projection.reduce((s, y) => s + y.effectiveRate, 0) / projection.length;
+
+  const depletionYear = projection.find(y => y.savingsDepleted);
+  const depletionAge = depletionYear ? depletionYear.age : null;
+
+  const retirementYear = projection[0];
+  const retirementMonthlyIncome = retirementYear ? retirementYear.netMonthlyIncome : 0;
+
+  const totalHealthInsuranceCost = projection
+    .filter(y => y.age < 65)
+    .reduce((s, y) => s + y.annualHealthCost, 0);
+
+  // Tax savings vs no-conversion baseline
+  const baselineProjection = runProjection({ ...inputs, conversionStrategy: "none" });
+  const baselineTax = baselineProjection.reduce((s, y) => s + y.totalTax, 0);
+  const optimizedTax = projection.reduce((s, y) => s + y.totalTax, 0);
+  const taxSavingsVsBaseline = Math.max(0, baselineTax - optimizedTax);
 
   return {
     totalFederalTax,
@@ -176,5 +209,9 @@ export function summarizeProjection(projection) {
     totalConversions,
     avgEffectiveRate,
     totalAllTax: totalFederalTax + totalStateTax + totalIRMAA,
+    depletionAge,
+    retirementMonthlyIncome,
+    totalHealthInsuranceCost,
+    taxSavingsVsBaseline,
   };
 }
