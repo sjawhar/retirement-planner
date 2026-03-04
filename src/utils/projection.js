@@ -1,4 +1,4 @@
-import { BRACKETS_SINGLE, BRACKETS_MFJ, ANNUAL_GROWTH_RATE, MAX_PROJECTION_AGE } from "../constants";
+import { BRACKETS_SINGLE, BRACKETS_MFJ, ANNUAL_GROWTH_RATE, MAX_PROJECTION_AGE, MEDICARE_START_AGE, MEDICARE_MONTHLY_COST } from "../constants";
 import {
   calcFederalTax,
   getMarginalRate,
@@ -40,6 +40,7 @@ export function runProjection(inputs) {
     monthlySpending,
     selectedState,
     conversionStrategy,
+    healthInsuranceCost,
   } = inputs;
 
   const conversionTarget = conversionStrategy === "fill12" ? 0.12 : conversionStrategy === "fill22" ? 0.22 : 0;
@@ -60,6 +61,23 @@ export function runProjection(inputs) {
     const totalSS = ss + spSS;
     const homeSale = age === homeSaleYear ? homeSaleGain : 0;
     const rmd = calcRMD(age, tradBal);
+
+    // ─── Health insurance cost ──────────────────────────────────
+    // Each spouse transitions to Medicare at their own age 65
+    const primaryMedicare = age >= MEDICARE_START_AGE;
+    const spouseMedicare = (spouseAge + (age - currentAge)) >= MEDICARE_START_AGE;
+
+    let annualHealthCost;
+    if (primaryMedicare && spouseMedicare) {
+      // Both on Medicare
+      annualHealthCost = MEDICARE_MONTHLY_COST * 12 * (filing === "mfj" ? 2 : 1);
+    } else if (primaryMedicare || spouseMedicare) {
+      // One on Medicare, one on private insurance
+      annualHealthCost = MEDICARE_MONTHLY_COST * 12 + healthInsuranceCost * 12;
+    } else {
+      // Both on private insurance
+      annualHealthCost = healthInsuranceCost * 12;
+    }
 
     // ─── Roth conversion: fill target bracket ───────────────────
     const stdDed = getStandardDeduction(filing, age, spAge);
@@ -134,6 +152,7 @@ export function runProjection(inputs) {
       standardDeduction: stdDed,
       conversionRoom,
       conversionTaxCost,
+      annualHealthCost,
     });
   }
 
