@@ -33,12 +33,7 @@ export function calcSSBenefit(annualPIA, claimAge) {
  * @param {number} endAge - Last age in the comparison (default 92)
  * @returns {Array} Array of { claimAge, monthly, annual, cumulativeByAge }
  */
-export function generateSSTimingData(
-  monthlyPIA,
-  claimAges = [62, 64, 67, 70],
-  startAge = 62,
-  endAge = 92
-) {
+export function generateSSTimingData(monthlyPIA, claimAges = [62, 64, 67, 70], startAge = 62, endAge = 92) {
   const annualPIA = monthlyPIA * 12;
 
   return claimAges.map((claimAge) => {

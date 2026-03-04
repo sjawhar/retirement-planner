@@ -30,9 +30,7 @@ export default function StateTab({ state }) {
     <div>
       {/* Bar chart */}
       <div style={{ background: "#fff", borderRadius: 12, padding: 16, border: "1px solid #e2e8f0", marginBottom: 16 }}>
-        <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700 }}>
-          Lifetime State Tax: Ages {retireAge}–85
-        </h3>
+        <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700 }}>Lifetime State Tax: Ages {retireAge}–85</h3>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={stateComparison} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -63,8 +61,15 @@ export default function StateTab({ state }) {
             {i === 0 && (
               <div
                 style={{
-                  position: "absolute", top: -9, left: 12, background: "#2563eb",
-                  color: "#fff", fontSize: 8, padding: "2px 7px", borderRadius: 4, fontWeight: 600,
+                  position: "absolute",
+                  top: -9,
+                  left: 12,
+                  background: "#2563eb",
+                  color: "#fff",
+                  fontSize: 8,
+                  padding: "2px 7px",
+                  borderRadius: 4,
+                  fontWeight: 600,
                 }}
               >
                 CURRENT
@@ -89,15 +94,15 @@ export default function StateTab({ state }) {
                       s.total < stateComparison[0].total
                         ? "#22c55e"
                         : s.total > stateComparison[0].total
-                        ? "#dc2626"
-                        : "#64748b",
+                          ? "#dc2626"
+                          : "#64748b",
                   }}
                 >
                   {s.total < stateComparison[0].total
                     ? "Save " + fmt(stateComparison[0].total - s.total)
                     : s.total > stateComparison[0].total
-                    ? "+ " + fmt(s.total - stateComparison[0].total)
-                    : "Same"}
+                      ? "+ " + fmt(s.total - stateComparison[0].total)
+                      : "Same"}
                 </strong>
               </div>
             )}

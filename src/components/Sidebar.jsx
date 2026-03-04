@@ -85,7 +85,13 @@ export default function Sidebar({ state, onChange }) {
       </InputGroup>
 
       <InputGroup label="Annual Investment Income">
-        <SliderInput value={state.investmentIncome} onChange={set("investmentIncome")} min={0} max={60000} step={1000} />
+        <SliderInput
+          value={state.investmentIncome}
+          onChange={set("investmentIncome")}
+          min={0}
+          max={60000}
+          step={1000}
+        />
       </InputGroup>
 
       <InputGroup label="Home Sale Gain (above exclusion)" hint="Taxable portion above $250K/$500K">
@@ -108,7 +114,13 @@ export default function Sidebar({ state, onChange }) {
       <SectionTitle>Planning</SectionTitle>
 
       <InputGroup label="Annual Living Expenses">
-        <SliderInput value={state.livingExpenses} onChange={set("livingExpenses")} min={30000} max={220000} step={2000} />
+        <SliderInput
+          value={state.livingExpenses}
+          onChange={set("livingExpenses")}
+          min={30000}
+          max={220000}
+          step={2000}
+        />
       </InputGroup>
 
       <InputGroup label="Current State">

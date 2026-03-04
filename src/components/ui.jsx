@@ -17,11 +17,7 @@ export function InputGroup({ label, children, hint }) {
         {label}
       </label>
       {children}
-      {hint && (
-        <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 1, fontStyle: "italic" }}>
-          {hint}
-        </div>
-      )}
+      {hint && <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 1, fontStyle: "italic" }}>{hint}</div>}
     </div>
   );
 }
@@ -128,9 +124,7 @@ export function Card({ title, value, subtitle, color = "#2563eb" }) {
       >
         {value}
       </div>
-      {subtitle && (
-        <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 2 }}>{subtitle}</div>
-      )}
+      {subtitle && <div style={{ fontSize: 9, color: "#94a3b8", marginTop: 2 }}>{subtitle}</div>}
     </div>
   );
 }

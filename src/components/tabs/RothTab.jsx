@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-} from "recharts";
+import { BarChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Card } from "../ui";
 import { fmt, fmtPct } from "../../utils";
 
@@ -13,8 +10,13 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
     <div>
       <div
         style={{
-          background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 12,
-          padding: 13, marginBottom: 16, fontSize: 13, lineHeight: 1.6,
+          background: "#fffbeb",
+          border: "1px solid #fde68a",
+          borderRadius: 12,
+          padding: 13,
+          marginBottom: 16,
+          fontSize: 13,
+          lineHeight: 1.6,
         }}
       >
         <strong>Strategy:</strong>{" "}
@@ -25,7 +27,12 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
 
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
         <Card title="Total Converted" value={fmt(summary.totalConversions)} color="#7c3aed" />
-        <Card title="Best Window" value={`Ages ${retireAge}–${ssClaimAge - 1}`} subtitle="Before SS starts" color="#d97706" />
+        <Card
+          title="Best Window"
+          value={`Ages ${retireAge}–${ssClaimAge - 1}`}
+          subtitle="Before SS starts"
+          color="#d97706"
+        />
         <Card title="Trad at 73" value={fmt(age73Data.tradBal || 0)} subtitle="Lower = smaller RMDs" color="#dc2626" />
         <Card title="Roth at 73" value={fmt(age73Data.rothBal || 0)} subtitle="Tax-free" color="#22c55e" />
       </div>
@@ -38,7 +45,12 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis dataKey="age" tick={{ fontSize: 10 }} />
             <YAxis yAxisId="l" tick={{ fontSize: 10 }} tickFormatter={(v) => "$" + (v / 1000).toFixed(0) + "k"} />
-            <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 10 }} tickFormatter={(v) => (v * 100).toFixed(0) + "%"} />
+            <YAxis
+              yAxisId="r"
+              orientation="right"
+              tick={{ fontSize: 10 }}
+              tickFormatter={(v) => (v * 100).toFixed(0) + "%"}
+            />
             <Tooltip
               formatter={(v, n) => (n.includes("Rate") ? [fmtPct(v), n] : [fmt(v), n])}
               labelFormatter={(l) => "Age " + l}
@@ -46,7 +58,15 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
             <Legend wrapperStyle={{ fontSize: 10 }} />
             <Bar yAxisId="l" dataKey="rothConversion" name="Roth Conversion" fill="#7c3aed" />
             <Bar yAxisId="l" dataKey="rmd" name="RMD" fill="#ef4444" />
-            <Line yAxisId="r" type="stepAfter" dataKey="marginalRate" name="Marginal Rate" stroke="#f59e0b" strokeWidth={2} dot={false} />
+            <Line
+              yAxisId="r"
+              type="stepAfter"
+              dataKey="marginalRate"
+              name="Marginal Rate"
+              stroke="#f59e0b"
+              strokeWidth={2}
+              dot={false}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -59,7 +79,10 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
             <thead>
               <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
                 {["Age", "Base Taxable", "Room", "Converted", "Rate", "Tax Cost", "Cumulative"].map((h) => (
-                  <th key={h} style={{ padding: "6px 4px", textAlign: "right", fontWeight: 600, color: "#64748b", fontSize: 8 }}>
+                  <th
+                    key={h}
+                    style={{ padding: "6px 4px", textAlign: "right", fontWeight: 600, color: "#64748b", fontSize: 8 }}
+                  >
                     {h}
                   </th>
                 ))}
@@ -70,17 +93,22 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
                 .filter((y) => y.rothConversion > 0 || y.age <= ssClaimAge + 2)
                 .slice(0, 25)
                 .map((y, i) => {
-                  const cumulative = projection
-                    .filter((p) => p.age <= y.age)
-                    .reduce((s, p) => s + p.rothConversion, 0);
+                  const cumulative = projection.filter((p) => p.age <= y.age).reduce((s, p) => s + p.rothConversion, 0);
                   return (
-                    <tr key={y.age} style={{ borderBottom: "1px solid #f1f5f9", background: i % 2 === 0 ? "#fff" : "#fafafa" }}>
+                    <tr
+                      key={y.age}
+                      style={{ borderBottom: "1px solid #f1f5f9", background: i % 2 === 0 ? "#fff" : "#fafafa" }}
+                    >
                       <td style={{ padding: "4px", fontWeight: 700, textAlign: "center" }}>{y.age}</td>
                       <td style={{ padding: "4px", textAlign: "right" }}>{fmt(y.taxableIncome - y.rothConversion)}</td>
                       <td style={{ padding: "4px", textAlign: "right", color: "#64748b" }}>{fmt(y.conversionRoom)}</td>
-                      <td style={{ padding: "4px", textAlign: "right", color: "#7c3aed", fontWeight: 600 }}>{fmt(y.rothConversion)}</td>
+                      <td style={{ padding: "4px", textAlign: "right", color: "#7c3aed", fontWeight: 600 }}>
+                        {fmt(y.rothConversion)}
+                      </td>
                       <td style={{ padding: "4px", textAlign: "right" }}>{fmtPct(y.marginalRate)}</td>
-                      <td style={{ padding: "4px", textAlign: "right", color: "#dc2626" }}>{fmt(y.rothConversion * y.marginalRate)}</td>
+                      <td style={{ padding: "4px", textAlign: "right", color: "#dc2626" }}>
+                        {fmt(y.rothConversion * y.marginalRate)}
+                      </td>
                       <td style={{ padding: "4px", textAlign: "right", fontWeight: 600 }}>{fmt(cumulative)}</td>
                     </tr>
                   );

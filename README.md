@@ -2,7 +2,7 @@
 
 An interactive, client-side tax planning tool for federal employees (FERS/CSRS) approaching retirement. Models year-by-year withdrawal strategies across TSP, pension, Social Security, and home sale proceeds to minimize lifetime federal and state income taxes.
 
-**[Live Demo →](#)** *(replace with your GitHub Pages URL)*
+**[Live Demo →](#)** _(replace with your GitHub Pages URL)_
 
 ## Features
 
@@ -92,14 +92,14 @@ base: "/your-repo-name/",
 
 All tax calculations live in `src/utils/` with constants in `src/constants/`. This separation makes it easy to update numbers annually without touching UI code.
 
-| File | What it calculates |
-|------|-------------------|
-| `federalTax.js` | Progressive bracket tax, marginal rates, SS taxable portion, standard deduction |
-| `stateTax.js` | State income tax with pension/SS/TSP exemptions per state profile |
-| `irmaa.js` | Medicare Part B surcharge tiers |
-| `rmd.js` | Required Minimum Distributions from the Uniform Lifetime Table |
-| `socialSecurity.js` | Benefit estimates at different claiming ages, cumulative comparison |
-| `projection.js` | **Core engine** — runs the full year-by-year model combining all of the above |
+| File                | What it calculates                                                              |
+| ------------------- | ------------------------------------------------------------------------------- |
+| `federalTax.js`     | Progressive bracket tax, marginal rates, SS taxable portion, standard deduction |
+| `stateTax.js`       | State income tax with pension/SS/TSP exemptions per state profile               |
+| `irmaa.js`          | Medicare Part B surcharge tiers                                                 |
+| `rmd.js`            | Required Minimum Distributions from the Uniform Lifetime Table                  |
+| `socialSecurity.js` | Benefit estimates at different claiming ages, cumulative comparison             |
+| `projection.js`     | **Core engine** — runs the full year-by-year model combining all of the above   |
 
 ## Annual Updates
 
@@ -137,23 +137,23 @@ Edit `DEFAULT_COMPARE_STATES` in `src/constants/stateTax.js`.
 
 All inputs auto-save to the URL. Only non-default values are included to keep URLs short.
 
-| Param | Field | Default |
-|-------|-------|---------|
-| `a` | Current age | 58 |
-| `r` | Retirement age | 60 |
-| `s` | Spouse's age | 56 |
-| `f` | Filing status | mfj |
-| `p` | FERS pension (annual) | 50000 |
-| `tt` | TSP traditional balance | 600000 |
-| `tr` | TSP Roth balance | 100000 |
-| `sp` | SS PIA (monthly) | 2400 |
-| `sc` | SS claim age | 67 |
-| `hg` | Home sale gain (above exclusion) | 0 |
-| `hy` | Home sale age | 62 |
-| `ii` | Annual investment income | 5000 |
-| `le` | Annual living expenses | 80000 |
-| `st` | State | Virginia |
-| `cs` | Conversion strategy | fill12 |
+| Param | Field                            | Default  |
+| ----- | -------------------------------- | -------- |
+| `a`   | Current age                      | 58       |
+| `r`   | Retirement age                   | 60       |
+| `s`   | Spouse's age                     | 56       |
+| `f`   | Filing status                    | mfj      |
+| `p`   | FERS pension (annual)            | 50000    |
+| `tt`  | TSP traditional balance          | 600000   |
+| `tr`  | TSP Roth balance                 | 100000   |
+| `sp`  | SS PIA (monthly)                 | 2400     |
+| `sc`  | SS claim age                     | 67       |
+| `hg`  | Home sale gain (above exclusion) | 0        |
+| `hy`  | Home sale age                    | 62       |
+| `ii`  | Annual investment income         | 5000     |
+| `le`  | Annual living expenses           | 80000    |
+| `st`  | State                            | Virginia |
+| `cs`  | Conversion strategy              | fill12   |
 
 **Example:** `?p=55000&tt=800000&sc=70&st=Pennsylvania&cs=fill22`
 

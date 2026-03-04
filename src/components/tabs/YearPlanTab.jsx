@@ -1,7 +1,15 @@
 import React from "react";
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
 } from "recharts";
 import { fmt, fmtPct } from "../../utils";
 
@@ -47,14 +55,30 @@ export default function YearPlanTab({ projection, ssClaimAge }) {
           <thead>
             <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
               {[
-                "Age", "Pension", "SS", "RMD", "Roth Conv", "Roth Draw",
-                "Home", "AGI", "Fed Tax", "St Tax", "IRMAA", "Eff%", "Trad$", "Roth$",
+                "Age",
+                "Pension",
+                "SS",
+                "RMD",
+                "Roth Conv",
+                "Roth Draw",
+                "Home",
+                "AGI",
+                "Fed Tax",
+                "St Tax",
+                "IRMAA",
+                "Eff%",
+                "Trad$",
+                "Roth$",
               ].map((h) => (
                 <th
                   key={h}
                   style={{
-                    padding: "6px 4px", textAlign: "right", fontWeight: 600,
-                    color: "#64748b", whiteSpace: "nowrap", fontSize: 8,
+                    padding: "6px 4px",
+                    textAlign: "right",
+                    fontWeight: 600,
+                    color: "#64748b",
+                    whiteSpace: "nowrap",
+                    fontSize: 8,
                   }}
                 >
                   {h}
@@ -74,15 +98,27 @@ export default function YearPlanTab({ projection, ssClaimAge }) {
               >
                 <td style={{ padding: "4px", fontWeight: 700, textAlign: "center" }}>{y.age}</td>
                 <td style={{ padding: "4px", textAlign: "right" }}>{fmt(y.pension)}</td>
-                <td style={{ padding: "4px", textAlign: "right", color: y.ss > 0 ? "#059669" : "#d1d5db" }}>{fmt(y.ss)}</td>
-                <td style={{ padding: "4px", textAlign: "right", color: y.rmd > 0 ? "#dc2626" : "#d1d5db" }}>{fmt(y.rmd)}</td>
-                <td style={{ padding: "4px", textAlign: "right", color: y.rothConversion > 0 ? "#7c3aed" : "#d1d5db" }}>{fmt(y.rothConversion)}</td>
-                <td style={{ padding: "4px", textAlign: "right", color: y.rothWithdrawal > 0 ? "#22c55e" : "#d1d5db" }}>{fmt(y.rothWithdrawal)}</td>
-                <td style={{ padding: "4px", textAlign: "right", color: y.homeSale > 0 ? "#d97706" : "#d1d5db" }}>{fmt(y.homeSale)}</td>
+                <td style={{ padding: "4px", textAlign: "right", color: y.ss > 0 ? "#059669" : "#d1d5db" }}>
+                  {fmt(y.ss)}
+                </td>
+                <td style={{ padding: "4px", textAlign: "right", color: y.rmd > 0 ? "#dc2626" : "#d1d5db" }}>
+                  {fmt(y.rmd)}
+                </td>
+                <td style={{ padding: "4px", textAlign: "right", color: y.rothConversion > 0 ? "#7c3aed" : "#d1d5db" }}>
+                  {fmt(y.rothConversion)}
+                </td>
+                <td style={{ padding: "4px", textAlign: "right", color: y.rothWithdrawal > 0 ? "#22c55e" : "#d1d5db" }}>
+                  {fmt(y.rothWithdrawal)}
+                </td>
+                <td style={{ padding: "4px", textAlign: "right", color: y.homeSale > 0 ? "#d97706" : "#d1d5db" }}>
+                  {fmt(y.homeSale)}
+                </td>
                 <td style={{ padding: "4px", textAlign: "right", fontWeight: 600 }}>{fmt(y.agi)}</td>
                 <td style={{ padding: "4px", textAlign: "right", color: "#2563eb" }}>{fmt(y.federalTax)}</td>
                 <td style={{ padding: "4px", textAlign: "right", color: "#059669" }}>{fmt(y.stateTax)}</td>
-                <td style={{ padding: "4px", textAlign: "right", color: y.irmaa > 0 ? "#dc2626" : "#d1d5db" }}>{fmt(y.irmaa)}</td>
+                <td style={{ padding: "4px", textAlign: "right", color: y.irmaa > 0 ? "#dc2626" : "#d1d5db" }}>
+                  {fmt(y.irmaa)}
+                </td>
                 <td style={{ padding: "4px", textAlign: "right" }}>{fmtPct(y.effectiveRate)}</td>
                 <td style={{ padding: "4px", textAlign: "right", color: "#475569" }}>{fmt(y.tradBal)}</td>
                 <td style={{ padding: "4px", textAlign: "right", color: "#16a34a" }}>{fmt(y.rothBal)}</td>

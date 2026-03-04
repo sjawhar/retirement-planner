@@ -1,7 +1,14 @@
 import React, { useMemo } from "react";
 import {
-  LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
 import { Card } from "../ui";
 import { generateSSTimingData, fmt } from "../../utils";
@@ -9,10 +16,7 @@ import { generateSSTimingData, fmt } from "../../utils";
 const COLORS = ["#ef4444", "#f59e0b", "#2563eb", "#22c55e"];
 
 export default function SSTab({ ssPIA, ssClaimAge }) {
-  const ssTimingData = useMemo(
-    () => generateSSTimingData(ssPIA),
-    [ssPIA]
-  );
+  const ssTimingData = useMemo(() => generateSSTimingData(ssPIA), [ssPIA]);
 
   return (
     <div>
@@ -24,9 +28,7 @@ export default function SSTab({ ssPIA, ssClaimAge }) {
             title={`Claim at ${s.claimAge}`}
             value={`$${s.monthly.toLocaleString()}/mo`}
             subtitle={`${fmt(s.annual)}/yr · ${
-              s.claimAge === 67
-                ? "100%"
-                : Math.round((s.annual / (ssPIA * 12)) * 100) + "%"
+              s.claimAge === 67 ? "100%" : Math.round((s.annual / (ssPIA * 12)) * 100) + "%"
             } of PIA`}
             color={s.claimAge === ssClaimAge ? "#2563eb" : "#64748b"}
           />
@@ -35,13 +37,17 @@ export default function SSTab({ ssPIA, ssClaimAge }) {
 
       {/* Cumulative benefit chart */}
       <div style={{ background: "#fff", borderRadius: 12, padding: 16, border: "1px solid #e2e8f0", marginBottom: 16 }}>
-        <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700 }}>
-          Cumulative Benefits by Claiming Age
-        </h3>
+        <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700 }}>Cumulative Benefits by Claiming Age</h3>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="age" type="number" domain={[62, 92]} tick={{ fontSize: 10 }} allowDuplicatedCategory={false} />
+            <XAxis
+              dataKey="age"
+              type="number"
+              domain={[62, 92]}
+              tick={{ fontSize: 10 }}
+              allowDuplicatedCategory={false}
+            />
             <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => "$" + (v / 1000).toFixed(0) + "k"} />
             <Tooltip formatter={(v) => [fmt(v)]} labelFormatter={(l) => "Age " + l} />
             <Legend wrapperStyle={{ fontSize: 10 }} />
@@ -78,7 +84,7 @@ export default function SSTab({ ssPIA, ssClaimAge }) {
               (_, idx) =>
                 s.cumulativeByAge[idx]?.cumulative >= prev.cumulativeByAge[idx]?.cumulative &&
                 s.cumulativeByAge[idx]?.cumulative > 0 &&
-                prev.cumulativeByAge[idx]?.cumulative > 0
+                prev.cumulativeByAge[idx]?.cumulative > 0,
             );
             const breakAge = breakEvenIdx >= 0 ? 62 + breakEvenIdx : null;
             return (
@@ -98,14 +104,17 @@ export default function SSTab({ ssPIA, ssClaimAge }) {
       {/* Tax impact note */}
       <div
         style={{
-          background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 12,
-          padding: 13, fontSize: 13, lineHeight: 1.7,
+          background: "#eff6ff",
+          border: "1px solid #bfdbfe",
+          borderRadius: 12,
+          padding: 13,
+          fontSize: 13,
+          lineHeight: 1.7,
         }}
       >
-        <strong>Tax Impact:</strong> Delaying SS extends your low-income Roth conversion window. Each year
-        of delay = another year converting TSP at 10–12% instead of 22–24% once SS stacks on pension and
-        RMDs. For federal retirees with pension bridge income, the conversion savings often exceed the SS
-        benefit difference.
+        <strong>Tax Impact:</strong> Delaying SS extends your low-income Roth conversion window. Each year of delay =
+        another year converting TSP at 10–12% instead of 22–24% once SS stacks on pension and RMDs. For federal retirees
+        with pension bridge income, the conversion savings often exceed the SS benefit difference.
       </div>
     </div>
   );
