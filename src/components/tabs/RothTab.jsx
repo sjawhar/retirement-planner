@@ -107,7 +107,7 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
                       </td>
                       <td style={{ padding: "4px", textAlign: "right" }}>{fmtPct(y.marginalRate)}</td>
                       <td style={{ padding: "4px", textAlign: "right", color: "#dc2626" }}>
-                        {fmt(y.rothConversion * y.marginalRate)}
+                        {fmt(y.conversionTaxCost)}
                       </td>
                       <td style={{ padding: "4px", textAlign: "right", fontWeight: 600 }}>{fmt(cumulative)}</td>
                     </tr>

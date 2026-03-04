@@ -74,6 +74,10 @@ export function runProjection(inputs) {
     const agi = nonSSIncome + ssTaxable;
     const taxableIncome = Math.max(0, agi - stdDed);
     const federalTax = calcFederalTax(taxableIncome, filing);
+    const taxWithoutConversion = rothConversion > 0
+      ? calcFederalTax(Math.max(0, agi - rothConversion - stdDed), filing)
+      : federalTax;
+    const conversionTaxCost = federalTax - taxWithoutConversion;
     const marginalRate = getMarginalRate(taxableIncome, filing);
     const irmaa = age >= 65 ? calcIRMAA(agi, filing) : 0;
     const stateTax = calcStateTax(selectedState, pension, ss, rmd, investmentIncome + homeSale, age);
@@ -111,6 +115,7 @@ export function runProjection(inputs) {
       rothBal,
       standardDeduction: stdDed,
       conversionRoom,
+      conversionTaxCost,
     });
   }
 

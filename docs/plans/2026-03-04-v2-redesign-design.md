@@ -112,11 +112,16 @@ Reorganize into clear sections with friendlier labels:
 - Spouse's SS estimate (monthly PIA) → new
 - Spouse's SS claim age → new
 
+**Assumption:** Both spouses' pensions start at the same retirement age (the
+"Target retirement age" input). If the spouse is still working or retires at a
+different time, they can adjust by setting the spouse's pension to $0 and
+increasing it in a separate scenario. Modeling independent retirement dates is
+out of scope for v2.
+
 **Savings**
 
 - TSP/401k Traditional balance → keep
 - TSP/401k Roth balance → keep
-- Other savings/investments → new (taxable brokerage, etc.)
 
 **Your Home**
 
@@ -126,7 +131,10 @@ Reorganize into clear sections with friendlier labels:
 
 **Expenses & Insurance**
 
-- Desired monthly income → replaces "annual living expenses"
+- Desired monthly spending → replaces "annual living expenses." This is total
+  household spending (rent/mortgage, food, travel, utilities, etc.) **excluding**
+  health insurance and taxes. The app models those separately and adds them on
+  top. This separation lets the user see exactly where their money goes.
 - Health insurance: FEHB / ACA Marketplace / Employer (spouse) / Other
 - Monthly health insurance cost (if known, otherwise estimate by type)
 
@@ -170,7 +178,7 @@ a concrete dollar amount.
 
 - Keep the Traditional vs. Roth line chart
 - Add a clear marker: "Savings depleted at age X" if applicable
-- Add total net worth line (Traditional + Roth + taxable)
+- Add total net worth line (Traditional + Roth)
 
 **Detail table**
 
@@ -228,18 +236,27 @@ The core loop in `projection.js` needs these changes:
 
 1. **Two pension inputs** summed as household pension income
 2. **Two SS inputs** with independent claim ages
-3. **Health insurance expense** modeled as a cost that drops at age 65
-   (Medicare). For ACA years, subsidy calculation based on household AGI.
-4. **Inflation adjustment** applied to expenses each year
+3. **Health insurance expense** modeled per-spouse. Each spouse has their own
+   Medicare start at age 65. Before 65, use the selected insurance type and
+   cost. After the primary retiree hits 65, cost drops to Medicare rates for
+   them; the spouse's cost drops when *they* hit 65 (based on spouse's age).
+4. **Inflation adjustment** applied to spending each year (not to pension —
+   FERS COLA is separate and smaller than general inflation, but modeling it
+   precisely is out of scope; using the same rate is close enough)
 5. **IRMAA 2-year lookback** — store AGI history and apply IRMAA based on
    AGI from 2 years prior
 6. **Correct Roth conversion tax cost** — use incremental tax calculation
-7. **Capital gains rates** for home sale gains above the exclusion
+7. **Capital gains rates** for home sale gains above the Section 121
+   exclusion. Add LTCG brackets (0%/15%/20%) to `src/constants/federalTax.js`.
+   In the projection, home sale gain is taxed at LTCG rates based on total
+   taxable income, not at ordinary income rates.
 8. **"Money runs out" detection** — flag the year where combined savings hit
    zero and calculate sustainable monthly income if savings must last to a
    target age (e.g., 92)
-9. **Net monthly income output** — after all taxes, insurance, and expenses,
-   what's left per month
+9. **Net monthly income output** — after all taxes, insurance, and spending,
+   what's left per month. Defined as:
+   `(total income - taxes - IRMAA - health insurance - spending) / 12`
+   A positive number means surplus; negative means drawing from savings.
 
 ### Constants Updates
 
@@ -252,13 +269,15 @@ The core loop in `projection.js` needs these changes:
 
 ## Out of Scope (for now)
 
+- Other savings/investments (taxable brokerage) — can add later when needed
+- Independent spouse retirement date — v2 assumes both retire together
 - Foreign property taxation / FBAR reporting (Peru properties)
 - Rental income modeling
 - Estate planning / inheritance
 - Detailed ACA plan selection (Silver vs. Gold, etc.)
 - WEP/GPO (relevant for CSRS, not FERS)
 - Part-time work income during retirement
-
+- FERS COLA modeling (using general inflation rate as approximation)
 These can be added later if needed. The tool should be useful without them.
 
 ## Success Criteria
