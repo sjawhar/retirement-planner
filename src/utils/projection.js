@@ -26,22 +26,27 @@ export function runProjection(inputs) {
     retireAge,
     spouseAge,
     filing,
-    pension,
+    monthlyPension,
+    spousePension,
     tspTraditional,
     tspRoth,
     ssPIA,
     ssClaimAge,
+    spouseSsPIA,
+    spouseSsClaimAge,
     homeSaleGain,
     homeSaleYear,
     investmentIncome,
-    livingExpenses,
+    monthlySpending,
     selectedState,
     conversionStrategy,
   } = inputs;
 
   const conversionTarget = conversionStrategy === "fill12" ? 0.12 : conversionStrategy === "fill22" ? 0.22 : 0;
 
-  const annualSS = calcSSBenefit(ssPIA * 12, ssClaimAge);
+  const annualPension = (monthlyPension + spousePension) * 12;
+  const primarySS = calcSSBenefit(ssPIA * 12, ssClaimAge);
+  const spouseSS = spouseSsPIA > 0 ? calcSSBenefit(spouseSsPIA * 12, spouseSsClaimAge) : 0;
   const brackets = filing === "mfj" ? BRACKETS_MFJ : BRACKETS_SINGLE;
 
   const years = [];
@@ -50,14 +55,16 @@ export function runProjection(inputs) {
 
   for (let age = retireAge; age <= MAX_PROJECTION_AGE; age++) {
     const spAge = spouseAge + (age - currentAge);
-    const ss = age >= ssClaimAge ? annualSS : 0;
+    const ss = age >= ssClaimAge ? primarySS : 0;
+    const spSS = age >= spouseSsClaimAge ? spouseSS : 0;
+    const totalSS = ss + spSS;
     const homeSale = age === homeSaleYear ? homeSaleGain : 0;
     const rmd = calcRMD(age, tradBal);
 
     // ─── Roth conversion: fill target bracket ───────────────────
     const stdDed = getStandardDeduction(filing, age, spAge);
-    const baseIncome = pension + investmentIncome + homeSale;
-    const baseTaxable = Math.max(0, baseIncome + calcSSTaxable(ss, baseIncome, filing) - stdDed);
+    const baseIncome = annualPension + investmentIncome + homeSale;
+    const baseTaxable = Math.max(0, baseIncome + calcSSTaxable(totalSS, baseIncome, filing) - stdDed);
 
     let conversionRoom = 0;
     if (conversionTarget > 0 && tradBal > rmd) {
@@ -71,9 +78,9 @@ export function runProjection(inputs) {
 
     // ─── Tax calculations ───────────────────────────────────────
     // Separate ordinary income from home sale gain (taxed at LTCG rates)
-    const ordinaryIncome = pension + traditionalWithdrawal + investmentIncome;
+    const ordinaryIncome = annualPension + traditionalWithdrawal + investmentIncome;
     // Home sale gain still counts toward provisional income for SS taxation
-    const ssTaxable = calcSSTaxable(ss, ordinaryIncome + homeSale, filing);
+    const ssTaxable = calcSSTaxable(totalSS, ordinaryIncome + homeSale, filing);
     const agi = ordinaryIncome + homeSale + ssTaxable;
     const ordinaryTaxable = Math.max(0, ordinaryIncome + ssTaxable - stdDed);
     const ordinaryFedTax = calcFederalTax(ordinaryTaxable, filing);
@@ -89,11 +96,11 @@ export function runProjection(inputs) {
     const irmaaYearData = years.find(y => y.age === irmaaAge);
     const irmaaIncome = irmaaYearData ? irmaaYearData.agi : agi;
     const irmaa = age >= 65 ? calcIRMAA(irmaaIncome, filing) : 0;
-    const stateTax = calcStateTax(selectedState, pension, ss, rmd, investmentIncome + homeSale, age);
+    const stateTax = calcStateTax(selectedState, annualPension, totalSS, rmd, investmentIncome + homeSale, age);
 
     // ─── Roth withdrawal to cover living expenses ───────────────
-    const afterTaxFromOtherSources = pension + ss + rmd + investmentIncome - federalTax - stateTax - irmaa;
-    const rothWithdrawal = Math.max(0, livingExpenses - afterTaxFromOtherSources);
+    const afterTaxFromOtherSources = annualPension + totalSS + rmd + investmentIncome - federalTax - stateTax - irmaa;
+    const rothWithdrawal = Math.max(0, monthlySpending * 12 - afterTaxFromOtherSources);
 
     // ─── Update balances ────────────────────────────────────────
     tradBal = Math.max(0, (tradBal - traditionalWithdrawal) * (1 + ANNUAL_GROWTH_RATE));
@@ -103,8 +110,10 @@ export function runProjection(inputs) {
 
     years.push({
       age,
-      pension,
+      annualPension,
       ss,
+      spouseSS: spSS,
+      totalSS,
       ssTaxable,
       rmd,
       rothConversion,
