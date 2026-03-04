@@ -17,11 +17,10 @@ test.describe("App loads and renders", () => {
     await expect(cards).toHaveCount(4);
 
     // Each card should have a title and value
-    await expect(cards.nth(0)).toContainText("Lifetime Fed Tax");
-    await expect(cards.nth(0)).toContainText("$");
-    await expect(cards.nth(1)).toContainText("Lifetime State Tax");
-    await expect(cards.nth(2)).toContainText("Avg Effective Rate");
-    await expect(cards.nth(3)).toContainText("Total Roth Conversions");
+    await expect(cards.nth(0)).toContainText("Savings Last To");
+    await expect(cards.nth(1)).toContainText("Monthly Income");
+    await expect(cards.nth(2)).toContainText("Health Insurance");
+    await expect(cards.nth(3)).toContainText("Tax Optimization Saves");
   });
 
   test("sidebar renders with all input sections", async ({ page }) => {
@@ -283,28 +282,29 @@ test.describe("URL parameters", () => {
 test.describe("Calculations sanity checks", () => {
   test("no-tax states show zero state tax", async ({ page }) => {
     await page.goto(`${BASE}?st=Florida`);
+    await page.getByRole("button", { name: /State Compare/i }).click();
 
-    // Lifetime State Tax card should show $0
-    const stateCard = page.locator(".summary-cards > div").nth(1);
-    await expect(stateCard).toContainText("$0");
+    // The current state card should show $0
+    const currentStateCard = page.locator(".state-grid > div").filter({ hasText: "CURRENT" });
+    await expect(currentStateCard).toContainText("$0");
   });
 
-  test("higher pension increases tax burden", async ({ page }) => {
+  test("higher pension increases monthly income", async ({ page }) => {
     // Low pension
     await page.goto(`${BASE}?p=20000`);
-    const lowPensionCard = page.locator(".summary-cards > div").first();
+    const lowPensionCard = page.locator(".summary-cards > div").nth(1);
     const lowPensionText = await lowPensionCard.textContent();
     const lowPensionMatch = lowPensionText.match(/\$([\d,]+)/);
-    const lowTax = parseInt(lowPensionMatch[1].replace(/,/g, ""));
+    const lowIncome = parseInt(lowPensionMatch[1].replace(/,/g, ""));
 
     // High pension
     await page.goto(`${BASE}?p=120000`);
-    const highPensionCard = page.locator(".summary-cards > div").first();
+    const highPensionCard = page.locator(".summary-cards > div").nth(1);
     const highPensionText = await highPensionCard.textContent();
     const highPensionMatch = highPensionText.match(/\$([\d,]+)/);
-    const highTax = parseInt(highPensionMatch[1].replace(/,/g, ""));
+    const highIncome = parseInt(highPensionMatch[1].replace(/,/g, ""));
 
-    expect(highTax).toBeGreaterThan(lowTax);
+    expect(highIncome).toBeGreaterThan(lowIncome);
   });
 
   test("Roth conversions reduce traditional balance at age 73", async ({ page }) => {

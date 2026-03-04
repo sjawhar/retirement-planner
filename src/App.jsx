@@ -172,25 +172,28 @@ export default function App() {
           {/* Summary cards */}
           <div className="summary-cards" style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
             <Card
-              title="Lifetime Fed Tax"
-              value={fmt(summary.totalFederalTax)}
-              subtitle={`Ages ${inputs.retireAge}–92`}
+              title="Savings Last To"
+              value={summary.depletionAge ? `Age ${summary.depletionAge}` : "92+"}
+              subtitle={summary.depletionAge ? "Consider delaying retirement" : "You're covered"}
+              color={summary.depletionAge && summary.depletionAge < 85 ? "#dc2626" : "#22c55e"}
             />
             <Card
-              title="Lifetime State Tax"
-              value={fmt(summary.totalStateTax)}
-              subtitle={inputs.selectedState}
-              color="#059669"
+              title="Monthly Income"
+              value={fmt(summary.retirementMonthlyIncome)}
+              subtitle={`At age ${inputs.retireAge}, after taxes`}
             />
-            <Card title="Avg Effective Rate" value={fmtPct(summary.avgEffectiveRate)} color="#7c3aed" />
             <Card
-              title="Total Roth Conversions"
-              value={fmt(summary.totalConversions)}
-              subtitle={
-                inputs.conversionStrategy === "none"
-                  ? "None"
-                  : `Fill ${inputs.conversionStrategy === "fill12" ? "12%" : "22%"}`
-              }
+              title="Health Insurance"
+              value={fmt(summary.totalHealthInsuranceCost)}
+              subtitle={`Ages ${inputs.retireAge}–65`}
+              color="#7c3aed"
+            />
+            <Card
+              title="Tax Optimization Saves"
+              value={fmt(summary.taxSavingsVsBaseline)}
+              subtitle={inputs.conversionStrategy === "none"
+                ? "Enable Roth strategy"
+                : `Via ${inputs.conversionStrategy === "fill12" ? "12%" : "22%"} fill`}
               color="#d97706"
             />
           </div>
