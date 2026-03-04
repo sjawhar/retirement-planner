@@ -86,6 +86,11 @@ export default function StateTab({ state, projection }) {
               <span style={{ color: "#64748b" }}>Lifetime: </span>
               <strong>{fmt(s.total)}</strong>
             </div>
+            {s.profile?.residencyNotes && (
+              <div style={{ fontSize: 10, color: "#64748b", marginTop: 6, lineHeight: 1.5 }}>
+                {s.profile.residencyNotes}
+              </div>
+            )}
             {i > 0 && (
               <div style={{ fontSize: 11 }}>
                 <span style={{ color: "#64748b" }}>vs {stateComparison[0].state}: </span>

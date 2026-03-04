@@ -98,7 +98,7 @@ test.describe("Tab navigation", () => {
 
     // State cards
     const stateCards = page.locator(".state-grid > div");
-    await expect(stateCards).toHaveCount(6); // Virginia + 5 comparison states
+    await expect(stateCards).toHaveCount(7); // Utah + 6 comparison states
 
     // Current state badge
     await expect(page.getByText("CURRENT", { exact: true })).toBeVisible();

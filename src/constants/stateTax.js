@@ -23,6 +23,7 @@ const STATE_TAX_PROFILES = {
     ssExempt: true,
     tspExempt: true,
     label: "No income tax",
+    residencyNotes: "No income tax. Homestead exemption available. Popular for part-time residents establishing domicile.",
   },
   Nevada: {
     rate: 0,
@@ -30,6 +31,7 @@ const STATE_TAX_PROFILES = {
     ssExempt: true,
     tspExempt: true,
     label: "No income tax",
+    residencyNotes: "No income tax. Low property tax. Easy domicile establishment for part-time residents.",
   },
   "New Hampshire": {
     rate: 0,
@@ -51,6 +53,7 @@ const STATE_TAX_PROFILES = {
     ssExempt: true,
     tspExempt: true,
     label: "No income tax",
+    residencyNotes: "No income tax. Low property tax. High sales tax (9.6% avg). Good for part-time residents.",
   },
   Texas: {
     rate: 0,
@@ -58,6 +61,7 @@ const STATE_TAX_PROFILES = {
     ssExempt: true,
     tspExempt: true,
     label: "No income tax",
+    residencyNotes: "No income tax. No homestead exemption for non-residents. Driver's license + voter registration establishes domicile.",
   },
   Washington: {
     rate: 0,
@@ -72,6 +76,7 @@ const STATE_TAX_PROFILES = {
     ssExempt: true,
     tspExempt: true,
     label: "No income tax",
+    residencyNotes: "No income tax. Lowest overall tax burden in the US. Minimal residency requirements.",
   },
 
   // ─── Tier 2: Has income tax but exempts all retirement income ───
@@ -102,6 +107,7 @@ const STATE_TAX_PROFILES = {
     ssExempt: true,
     tspExempt: true,
     label: "All retirement income exempt",
+    residencyNotes: "Exempts all retirement income (pension, TSP, SS). Flat 3.07% on other income. Close to DC area.",
   },
 
   // ─── Tier 3: Partial exemptions ─────────────────────────────────
@@ -185,6 +191,14 @@ const STATE_TAX_PROFILES = {
     tspExempt: false,
     label: "SS exempt; flat 4.25%",
   },
+  Utah: {
+    rate: 0.0465,
+    pensionExempt: false,
+    ssExempt: false,
+    tspExempt: false,
+    label: "Flat 4.65%; taxes all retirement income including SS",
+    residencyNotes: "Taxes Social Security. Consider establishing residency in a no-income-tax state.",
+  },
 
   // ─── Tier 5: Unfavorable ────────────────────────────────────────
   California: {
@@ -209,4 +223,4 @@ export default STATE_TAX_PROFILES;
 export const STATE_NAMES = Object.keys(STATE_TAX_PROFILES).sort();
 
 // Default states to compare in the State Comparison tab
-export const DEFAULT_COMPARE_STATES = ["Pennsylvania", "Florida", "Texas", "North Carolina", "Georgia"];
+export const DEFAULT_COMPARE_STATES = ["Florida", "Texas", "Nevada", "Wyoming", "Tennessee", "Pennsylvania"];
