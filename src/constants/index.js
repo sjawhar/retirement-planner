@@ -15,3 +15,5 @@ export { RMD_DIVISOR_TABLE, RMD_START_AGE, RMD_FALLBACK_DIVISOR } from "./rmd";
 export { default as STATE_TAX_PROFILES, STATE_NAMES, DEFAULT_COMPARE_STATES } from "./stateTax";
 
 export { DEFAULTS, PARAM_MAP, NUMERIC_FIELDS, ANNUAL_GROWTH_RATE, MAX_PROJECTION_AGE } from "./defaults";
+
+export * from "./healthInsurance";
