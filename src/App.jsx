@@ -237,7 +237,14 @@ export default function App() {
             />
           )}
           {tab === "states" && <StateTab state={inputs} projection={projection} />}
-          {tab === "ss" && <SSTab ssPIA={inputs.ssPIA} ssClaimAge={inputs.ssClaimAge} />}
+          {tab === "ss" && (
+            <SSTab
+              ssPIA={inputs.ssPIA}
+              ssClaimAge={inputs.ssClaimAge}
+              spouseSsPIA={inputs.spouseSsPIA}
+              spouseSsClaimAge={inputs.spouseSsClaimAge}
+            />
+          )}
 
           {/* Disclaimer */}
           <div
