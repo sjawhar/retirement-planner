@@ -79,7 +79,10 @@ export function runProjection(inputs) {
       : federalTax;
     const conversionTaxCost = federalTax - taxWithoutConversion;
     const marginalRate = getMarginalRate(taxableIncome, filing);
-    const irmaa = age >= 65 ? calcIRMAA(agi, filing) : 0;
+    const irmaaAge = age - 2;
+    const irmaaYearData = years.find(y => y.age === irmaaAge);
+    const irmaaIncome = irmaaYearData ? irmaaYearData.agi : agi;
+    const irmaa = age >= 65 ? calcIRMAA(irmaaIncome, filing) : 0;
     const stateTax = calcStateTax(selectedState, pension, ss, rmd, investmentIncome + homeSale, age);
 
     // ─── Roth withdrawal to cover living expenses ───────────────
