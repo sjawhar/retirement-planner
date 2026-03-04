@@ -129,7 +129,7 @@ export default function Sidebar({ state, onChange }) {
         </InputGroup>
       )}
 
-      <SectionTitle>Strategy</SectionTitle>
+      <SectionTitle>Expenses & Insurance</SectionTitle>
 
       <InputGroup label="Monthly Spending">
         <SliderInput
@@ -140,8 +140,6 @@ export default function Sidebar({ state, onChange }) {
           step={100}
         />
       </InputGroup>
-
-      <SectionTitle>Expenses & Insurance</SectionTitle>
 
       <InputGroup label="Health Insurance">
         <select value={state.healthInsurance} onChange={(e) => set("healthInsurance")(e.target.value)} style={selectStyle}>
@@ -159,6 +157,8 @@ export default function Sidebar({ state, onChange }) {
       <InputGroup label="Inflation Rate">
         <SliderInput value={state.inflationRate} onChange={set("inflationRate")} min={0} max={0.05} step={0.005} suffix="%" formatValue={(v) => (v * 100).toFixed(1)} />
       </InputGroup>
+
+      <SectionTitle>Strategy</SectionTitle>
 
       <InputGroup label="Current State">
         <select value={state.selectedState} onChange={(e) => set("selectedState")(e.target.value)} style={selectStyle}>
