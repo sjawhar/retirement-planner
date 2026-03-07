@@ -14,10 +14,10 @@ export default function StateTab({ state, projection }) {
       for (const year of projection) {
         total += calcStateTax(
           st,
-          year.pension,
-          year.ss,
+          year.annualPension,
+          year.totalSS,
           year.traditionalWithdrawal,
-          year.investmentIncome + year.homeSale,
+          year.investmentIncome + (year.homeSaleTaxableGain || 0),
           year.age,
         );
       }

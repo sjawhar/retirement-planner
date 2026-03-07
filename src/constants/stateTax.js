@@ -71,6 +71,8 @@ const STATE_TAX_PROFILES = {
     ssExempt: true,
     tspExempt: true,
     label: "No income tax",
+    residencyNotes:
+      "No income tax. No capital gains tax on investments. High sales tax (~10%). Property can establish domicile for part-time residents living abroad.",
   },
   Wyoming: {
     rate: 0,
@@ -225,4 +227,4 @@ export default STATE_TAX_PROFILES;
 export const STATE_NAMES = Object.keys(STATE_TAX_PROFILES).sort();
 
 // Default states to compare in the State Comparison tab
-export const DEFAULT_COMPARE_STATES = ["Florida", "Texas", "Nevada", "Wyoming", "Tennessee", "Pennsylvania"];
+export const DEFAULT_COMPARE_STATES = ["Washington", "Florida", "Texas", "Nevada", "Wyoming", "Tennessee", "Pennsylvania"];

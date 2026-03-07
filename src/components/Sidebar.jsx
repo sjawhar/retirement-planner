@@ -68,11 +68,11 @@ export default function Sidebar({ state, onChange }) {
         <SliderInput value={state.monthlyPension} onChange={set("monthlyPension")} min={0} max={5000} step={50} />
       </InputGroup>
 
-      <InputGroup label="TSP Traditional Balance">
+      <InputGroup label="Your TSP Traditional">
         <SliderInput value={state.tspTraditional} onChange={set("tspTraditional")} min={0} max={2500000} step={10000} />
       </InputGroup>
 
-      <InputGroup label="TSP Roth Balance">
+      <InputGroup label="Your TSP Roth">
         <SliderInput value={state.tspRoth} onChange={set("tspRoth")} min={0} max={750000} step={5000} />
       </InputGroup>
 
@@ -82,6 +82,20 @@ export default function Sidebar({ state, onChange }) {
 
           <InputGroup label="Spouse's Monthly Pension">
             <SliderInput value={state.spousePension} onChange={set("spousePension")} min={0} max={5000} step={50} />
+          </InputGroup>
+
+          <InputGroup label="Spouse's TSP Traditional">
+            <SliderInput
+              value={state.spouseTspTraditional}
+              onChange={set("spouseTspTraditional")}
+              min={0}
+              max={2500000}
+              step={10000}
+            />
+          </InputGroup>
+
+          <InputGroup label="Spouse's TSP Roth">
+            <SliderInput value={state.spouseTspRoth} onChange={set("spouseTspRoth")} min={0} max={750000} step={5000} />
           </InputGroup>
 
           <InputGroup label="Spouse's SS Estimate (monthly PIA)">
@@ -109,42 +123,116 @@ export default function Sidebar({ state, onChange }) {
         <SliderInput value={state.ssClaimAge} onChange={set("ssClaimAge")} min={62} max={70} prefix="" suffix=" yrs" />
       </InputGroup>
 
-      <InputGroup label="Annual Investment Income">
+      <InputGroup label="Other US-Reported Income" hint="Any rental, investment, or other income reported on US taxes">
+        <SliderInput value={state.investmentIncome} onChange={set("investmentIncome")} min={0} max={60000} step={500} />
+      </InputGroup>
+
+      <SectionTitle>Home Sale</SectionTitle>
+
+      <InputGroup label="Home Value" hint="Estimated sale price">
+        <SliderInput value={state.homeValue} onChange={set("homeValue")} min={0} max={1500000} step={10000} />
+      </InputGroup>
+
+      {state.homeValue > 0 && (
+        <>
+          <InputGroup label="Purchase Price / Cost Basis">
+            <SliderInput
+              value={state.homeCostBasis}
+              onChange={set("homeCostBasis")}
+              min={0}
+              max={1000000}
+              step={5000}
+            />
+          </InputGroup>
+
+          <InputGroup label="Sell at Age">
+            <SliderInput
+              value={state.homeSaleAge}
+              onChange={set("homeSaleAge")}
+              min={state.currentAge}
+              max={78}
+              prefix=""
+              suffix=" yrs"
+            />
+          </InputGroup>
+
+          {/* Show calculated gain and exclusion */}
+          {(() => {
+            const gain = Math.max(0, state.homeValue - state.homeCostBasis);
+            const exclusion = state.filing === "mfj" ? 500000 : 250000;
+            const taxable = Math.max(0, gain - exclusion);
+            const costs = state.homeValue * 0.06;
+            const netProceeds = state.homeValue - costs;
+            return (
+              <div style={{ fontSize: 10, color: "#64748b", lineHeight: 1.7, marginBottom: 8, padding: "0 2px" }}>
+                Gain: ${gain.toLocaleString()} · Exclusion: ${exclusion.toLocaleString()}
+                <br />
+                Taxable gain:{" "}
+                <strong style={{ color: taxable > 0 ? "#dc2626" : "#16a34a" }}>${taxable.toLocaleString()}</strong>
+                <br />
+                Net proceeds (after ~6% costs): <strong>${netProceeds.toLocaleString()}</strong>
+              </div>
+            );
+          })()}
+        </>
+      )}
+
+      <SectionTitle>Peru Property</SectionTitle>
+
+      <InputGroup label="Future Purchase Cost" hint="Cash purchase for primary Peru residence">
         <SliderInput
-          value={state.investmentIncome}
-          onChange={set("investmentIncome")}
+          value={state.peruPropertyCost}
+          onChange={set("peruPropertyCost")}
           min={0}
-          max={60000}
-          step={1000}
+          max={300000}
+          step={5000}
         />
       </InputGroup>
 
-      <InputGroup label="Home Sale Gain (above exclusion)" hint="Taxable portion above $250K/$500K">
-        <SliderInput value={state.homeSaleGain} onChange={set("homeSaleGain")} min={0} max={500000} step={5000} />
-      </InputGroup>
-
-      {state.homeSaleGain > 0 && (
-        <InputGroup label="Sale at Age">
+      {state.peruPropertyCost > 0 && (
+        <InputGroup label="Purchase at Age">
           <SliderInput
-            value={state.homeSaleYear}
-            onChange={set("homeSaleYear")}
-            min={state.retireAge}
-            max={78}
+            value={state.peruPropertyAge}
+            onChange={set("peruPropertyAge")}
+            min={state.currentAge}
+            max={70}
             prefix=""
             suffix=" yrs"
           />
         </InputGroup>
       )}
 
+      <InputGroup label="Peru Rental Income (annual)" hint="Stays in Peru — not on US taxes. Shown for reference only.">
+        <SliderInput
+          value={state.peruRentalIncome}
+          onChange={set("peruRentalIncome")}
+          min={0}
+          max={36000}
+          step={500}
+        />
+      </InputGroup>
+
       <SectionTitle>Expenses & Insurance</SectionTitle>
 
-      <InputGroup label="Monthly Spending">
+      <InputGroup label="Monthly Spending" hint="US-side expenses (Peru covered by rental income)">
         <SliderInput
           value={state.monthlySpending}
           onChange={set("monthlySpending")}
           min={2000}
           max={15000}
           step={100}
+        />
+      </InputGroup>
+
+      <SectionTitle>Travel</SectionTitle>
+
+      <InputGroup label="Annual Travel Budget" hint="US, South America, international combined">
+        <SliderInput
+          value={state.annualTravelBudget}
+          onChange={set("annualTravelBudget")}
+          min={0}
+          max={36000}
+          step={500}
         />
       </InputGroup>
 
@@ -184,6 +272,17 @@ export default function Sidebar({ state, onChange }) {
       </InputGroup>
 
       <SectionTitle>Strategy</SectionTitle>
+
+      <InputGroup label="I Want My Money to Last To" hint="The app calculates max spending to hit zero at this age">
+        <SliderInput
+          value={state.targetEndAge}
+          onChange={set("targetEndAge")}
+          min={75}
+          max={100}
+          prefix=""
+          suffix=" yrs"
+        />
+      </InputGroup>
 
       <InputGroup label="Current State">
         <select value={state.selectedState} onChange={(e) => set("selectedState")(e.target.value)} style={selectStyle}>

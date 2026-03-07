@@ -17,10 +17,10 @@ test.describe("App loads and renders", () => {
     await expect(cards).toHaveCount(4);
 
     // Each card should have a title and value
-    await expect(cards.nth(0)).toContainText("Savings Last To");
-    await expect(cards.nth(1)).toContainText("Monthly Income");
-    await expect(cards.nth(2)).toContainText("Health Insurance");
-    await expect(cards.nth(3)).toContainText("Tax Optimization Saves");
+    await expect(cards.nth(0)).toContainText("You Can Spend");
+    await expect(cards.nth(1)).toContainText("Money Lasts To");
+    await expect(cards.nth(2)).toContainText("Tax Strategy Saves");
+    await expect(cards.nth(3)).toContainText("Health Insurance");
   });
 
   test("sidebar renders with all input sections", async ({ page }) => {
@@ -35,7 +35,7 @@ test.describe("App loads and renders", () => {
 
     // Check key inputs exist
     await expect(sidebar.locator("select")).toHaveCount(4); // Filing, Health Insurance, State, Roth Strategy
-    await expect(sidebar.locator('input[type="range"]')).toHaveCount(16); // All sliders (MFJ has spouse fields)
+    await expect(sidebar.locator('input[type="range"]')).toHaveCount(25); // All sliders (MFJ + home sale + Peru + rental + travel + target age)
   });
 
   test("no console errors on load", async ({ page }) => {
@@ -75,30 +75,30 @@ test.describe("Tab navigation", () => {
     await expect(rows).toHaveCount(33); // ages 60-92
   });
 
-  test("Roth Optimizer tab", async ({ page }) => {
-    await page.getByRole("button", { name: /Roth Optimizer/i }).click();
+  test("Tax Strategy tab", async ({ page }) => {
+    await page.getByRole("button", { name: /Tax Strategy/i }).click();
 
     // Strategy description should be visible
-    await expect(page.locator("text=Strategy:")).toBeVisible();
+    await expect(page.locator("text=What this does:")).toBeVisible();
     // Summary cards
-    await expect(page.locator("text=Total Converted")).toBeVisible();
+    await expect(page.locator("text=Total Moved to Tax-Free")).toBeVisible();
     await expect(page.locator("text=Best Window")).toBeVisible();
-    await expect(page.locator("text=Trad at 73")).toBeVisible();
-    await expect(page.locator("text=Roth at 73")).toBeVisible();
+    await expect(page.locator("text=TSP Pre-Tax at 73")).toBeVisible();
+    await expect(page.locator("text=TSP Tax-Free at 73")).toBeVisible();
 
     // Conversion detail table
-    await expect(page.locator("text=Conversion Detail")).toBeVisible();
+    await expect(page.locator("text=Year-by-Year Breakdown")).toBeVisible();
   });
 
-  test("State Compare tab", async ({ page }) => {
-    await page.getByRole("button", { name: /State Compare/i }).click();
+  test("Where to Live tab", async ({ page }) => {
+    await page.getByRole("button", { name: /Where to Live/i }).click();
 
     // Bar chart title
     await expect(page.getByRole("heading", { name: /Lifetime State Tax/ })).toBeVisible();
 
     // State cards
     const stateCards = page.locator(".state-grid > div");
-    await expect(stateCards).toHaveCount(7); // Utah + 6 comparison states
+    await expect(stateCards).toHaveCount(8); // Utah + 7 comparison states (including Washington)
 
     // Current state badge
     await expect(page.getByText("CURRENT", { exact: true })).toBeVisible();
@@ -108,8 +108,8 @@ test.describe("Tab navigation", () => {
     await expect(page.locator("text=Lifetime:").first()).toBeVisible();
   });
 
-  test("SS Timing tab", async ({ page }) => {
-    await page.getByRole("button", { name: /SS Timing/i }).click();
+  test("Social Security tab", async ({ page }) => {
+    await page.getByRole("button", { name: /Social Security/i }).click();
 
     // Claim age cards
     const ssCards = page.locator(".ss-cards > div");
@@ -130,27 +130,27 @@ test.describe("Tab navigation", () => {
   });
 
   test("tabs switch content correctly", async ({ page }) => {
-    // Start on Year-by-Year
-    await expect(page.locator("text=Income vs Expenses")).toBeVisible();
+    // Start on Timeline
+    await expect(page.getByRole("heading", { name: /Where Your Money Comes From/ })).toBeVisible();
 
-    // Switch to Roth
-    await page.getByRole("button", { name: /Roth Optimizer/i }).click();
-    await expect(page.locator("text=Income vs Expenses")).not.toBeVisible();
-    await expect(page.locator("text=Strategy:")).toBeVisible();
+    // Switch to Tax Strategy
+    await page.getByRole("button", { name: /Tax Strategy/i }).click();
+    await expect(page.getByRole("heading", { name: /Where Your Money Comes From/ })).not.toBeVisible();
+    await expect(page.locator("text=What this does:")).toBeVisible();
 
-    // Switch to States
-    await page.getByRole("button", { name: /State Compare/i }).click();
-    await expect(page.locator("text=Strategy:")).not.toBeVisible();
+    // Switch to Where to Live
+    await page.getByRole("button", { name: /Where to Live/i }).click();
+    await expect(page.locator("text=What this does:")).not.toBeVisible();
     await expect(page.locator(".state-grid")).toBeVisible();
 
-    // Switch to SS
-    await page.getByRole("button", { name: /SS Timing/i }).click();
+    // Switch to Social Security
+    await page.getByRole("button", { name: /Social Security/i }).click();
     await expect(page.locator(".state-grid")).not.toBeVisible();
     await expect(page.locator(".ss-cards")).toBeVisible();
 
-    // Back to Year-by-Year
-    await page.getByRole("button", { name: /Year-by-Year/i }).click();
-    await expect(page.locator("text=Income vs Expenses")).toBeVisible();
+    // Back to Timeline
+    await page.getByRole("button", { name: /Timeline/i }).click();
+    await expect(page.getByRole("heading", { name: /Where Your Money Comes From/ })).toBeVisible();
   });
 });
 
@@ -173,27 +173,27 @@ test.describe("Sidebar interactions", () => {
   });
 
   test("changing Roth strategy updates display", async ({ page }) => {
-    // Switch to Roth tab
-    await page.getByRole("button", { name: /Roth Optimizer/i }).click();
-    await expect(page.locator("text=Strategy:")).toBeVisible();
+    // Switch to Tax Strategy tab
+    await page.getByRole("button", { name: /Tax Strategy/i }).click();
+    await expect(page.locator("text=What this does:")).toBeVisible();
 
     // Change to none
     await page.locator("select").nth(3).selectOption("none");
-    await expect(page.getByText("No Roth conversions —")).toBeVisible();
+    await expect(page.getByText("No tax strategy selected.")).toBeVisible();
 
     // Change to fill22
     await page.locator("select").nth(3).selectOption("fill22");
-    await expect(page.locator("text=Strategy:")).toBeVisible();
+    await expect(page.locator("text=What this does:")).toBeVisible();
   });
 
-  test("home sale gain shows sale age slider", async ({ page }) => {
-    // Sale at Age should not be visible when gain is 0
-    await expect(page.locator("text=Sale at Age")).not.toBeVisible();
+  test("home value shows sale details", async ({ page }) => {
+    // With default homeValue > 0, the sale inputs should be visible
+    await expect(page.locator("text=Purchase Price")).toBeVisible();
+    await expect(page.locator("text=Sell at Age")).toBeVisible();
 
-    // Set home sale gain > 0 by manipulating the slider
-    const homeSaleSlider = page.locator('input[type="range"]').nth(12);
-    await homeSaleSlider.fill("100000");
-    await expect(page.locator("text=Sale at Age")).toBeVisible();
+    // Navigate with homeValue=0 to hide sale details
+    await page.goto(`${BASE}?hv=0`);
+    await expect(page.locator("text=Purchase Price")).not.toBeVisible();
   });
 
   test("sidebar toggle works", async ({ page }) => {
@@ -270,7 +270,7 @@ test.describe("URL parameters", () => {
     const updatedUrl = page.url();
     expect(updatedUrl).toContain("st=Pennsylvania");
     // Other defaults should not be in URL
-    expect(updatedUrl).not.toContain("p=850");
+    expect(updatedUrl).not.toContain("p=800");
     expect(updatedUrl).not.toContain("f=mfj");
   });
 });
@@ -278,41 +278,41 @@ test.describe("URL parameters", () => {
 test.describe("Calculations sanity checks", () => {
   test("no-tax states show zero state tax", async ({ page }) => {
     await page.goto(`${BASE}?st=Florida`);
-    await page.getByRole("button", { name: /State Compare/i }).click();
+    await page.getByRole("button", { name: /Where to Live/i }).click();
 
     // The current state card should show $0
     const currentStateCard = page.locator(".state-grid > div").filter({ hasText: "CURRENT" });
     await expect(currentStateCard).toContainText("$0");
   });
 
-  test("higher pension increases monthly income", async ({ page }) => {
-    // Low pension
-    await page.goto(`${BASE}?p=500`);
-    const lowPensionCard = page.locator(".summary-cards > div").nth(1);
-    const lowPensionText = await lowPensionCard.textContent();
-    const lowPensionMatch = lowPensionText.match(/\$([\d,]+)/);
-    const lowIncome = parseInt(lowPensionMatch[1].replace(/,/g, ""));
+  test("higher pension increases spendable amount", async ({ page }) => {
+    // Use Florida (no state tax) to isolate the pension effect.
+    // The 'You Can Spend' card (nth 0) shows max monthly spending.
+    await page.goto(`${BASE}?p=0&st=Florida&hv=0&pc=0`);
+    const lowCard = page.locator(".summary-cards > div").nth(0);
+    const lowText = await lowCard.textContent();
+    const lowMatch = lowText.match(/\$(\d[\d,]*)/);
+    const lowSpend = parseInt(lowMatch[1].replace(/,/g, ""));
 
-    // High pension
-    await page.goto(`${BASE}?p=5000`);
-    const highPensionCard = page.locator(".summary-cards > div").nth(1);
-    const highPensionText = await highPensionCard.textContent();
-    const highPensionMatch = highPensionText.match(/\$([\d,]+)/);
-    const highIncome = parseInt(highPensionMatch[1].replace(/,/g, ""));
+    await page.goto(`${BASE}?p=5000&st=Florida&hv=0&pc=0`);
+    const highCard = page.locator(".summary-cards > div").nth(0);
+    const highText = await highCard.textContent();
+    const highMatch = highText.match(/\$(\d[\d,]*)/);
+    const highSpend = parseInt(highMatch[1].replace(/,/g, ""));
 
-    expect(highIncome).toBeGreaterThan(lowIncome);
+    expect(highSpend).toBeGreaterThan(lowSpend);
   });
 
   test("Roth conversions reduce traditional balance at age 73", async ({ page }) => {
     // With conversions
     await page.goto(`${BASE}?cs=fill12`);
-    await page.getByRole("button", { name: /Roth Optimizer/i }).click();
-    const tradAt73With = await page.locator("text=Trad at 73").locator("..").textContent();
+    await page.getByRole("button", { name: /Tax Strategy/i }).click();
+    const tradAt73With = await page.locator("text=TSP Pre-Tax at 73").locator("..").textContent();
 
     // Without conversions
     await page.goto(`${BASE}?cs=none`);
-    await page.getByRole("button", { name: /Roth Optimizer/i }).click();
-    const tradAt73Without = await page.locator("text=Trad at 73").locator("..").textContent();
+    await page.getByRole("button", { name: /Tax Strategy/i }).click();
+    const tradAt73Without = await page.locator("text=TSP Pre-Tax at 73").locator("..").textContent();
 
     // Traditional balance should be lower with conversions
     const parseVal = (text) => {
@@ -325,7 +325,7 @@ test.describe("Calculations sanity checks", () => {
 
   test("delaying SS increases monthly benefit", async ({ page }) => {
     await page.goto(BASE);
-    await page.getByRole("button", { name: /SS Timing/i }).click();
+    await page.getByRole("button", { name: /Social Security/i }).click();
 
     // Extract monthly values from cards
     const cards = page.locator(".ss-cards > div");

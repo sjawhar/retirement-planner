@@ -5,6 +5,8 @@ import {
   MAX_PROJECTION_AGE,
   MEDICARE_START_AGE,
   MEDICARE_MONTHLY_COST,
+  HOME_SALE_EXCLUSION,
+  HOME_SELLING_COST_RATE,
 } from "../constants";
 import {
   calcFederalTax,
@@ -22,7 +24,9 @@ import {
  * Run a full year-by-year retirement projection.
  *
  * Models: pension income, Social Security, TSP RMDs, Roth conversions,
- * home sale gains, federal/state taxes, IRMAA, and account balance growth.
+ * home sale (value/basis with Section 121 exclusion), cash balance from
+ * proceeds, Peru property purchase, federal/state taxes, IRMAA, and
+ * account balance growth.
  *
  * @param {object} inputs - All user inputs
  * @returns {Array} Array of year objects with all calculated fields
@@ -36,19 +40,29 @@ export function runProjection(inputs) {
     monthlyPension,
     spousePension,
     tspTraditional,
+    spouseTspTraditional = 0,
     tspRoth,
+    spouseTspRoth = 0,
     ssPIA,
     ssClaimAge,
     spouseSsPIA,
     spouseSsClaimAge,
-    homeSaleGain,
-    homeSaleYear,
+    homeValue = 0,
+    homeCostBasis = 0,
+    homeSaleAge = 0,
     investmentIncome,
+    peruPropertyCost = 0,
+    peruPropertyAge = 0,
+    peruRentalIncome = 0,
     monthlySpending,
+    annualTravelBudget = 0,
     selectedState,
     conversionStrategy,
     healthInsuranceCost,
     inflationRate,
+    // Legacy fields for URL backwards compatibility
+    homeSaleGain,
+    homeSaleYear,
   } = inputs;
 
   const conversionTarget = conversionStrategy === "fill12" ? 0.12 : conversionStrategy === "fill22" ? 0.22 : 0;
@@ -58,17 +72,58 @@ export function runProjection(inputs) {
   const spouseSS = spouseSsPIA > 0 ? calcSSBenefit(spouseSsPIA * 12, spouseSsClaimAge) : 0;
   const brackets = filing === "mfj" ? BRACKETS_MFJ : BRACKETS_SINGLE;
 
+  // ─── Home sale pre-calculation ─────────────────────────────────
+  // Calculate taxable gain and net proceeds from home value/basis
+  let homeSaleGainAmount = 0;
+  let homeSaleNetProceeds = 0;
+  const effectiveHomeSaleAge = homeValue > 0 ? homeSaleAge : homeSaleYear || 0;
+
+  if (homeValue > 0) {
+    const gain = Math.max(0, homeValue - homeCostBasis);
+    const exclusion = filing === "mfj" ? HOME_SALE_EXCLUSION.mfj : HOME_SALE_EXCLUSION.single;
+    homeSaleGainAmount = Math.max(0, gain - exclusion);
+    const sellingCosts = homeValue * HOME_SELLING_COST_RATE;
+    homeSaleNetProceeds = homeValue - sellingCosts;
+  } else if (homeSaleGain > 0) {
+    // Legacy: direct gain input (for old shared URLs)
+    homeSaleGainAmount = homeSaleGain;
+    homeSaleNetProceeds = homeSaleGain; // best approximation
+  }
+
   const years = [];
-  let tradBal = tspTraditional;
-  let rothBal = tspRoth;
+  let tradBal = tspTraditional + spouseTspTraditional;
+  let rothBal = tspRoth + spouseTspRoth;
+  let cashBal = 0;
+
+  // ─── Pre-retirement events ─────────────────────────────────
+  // If the home sale or Peru purchase happens before retirement,
+  // apply the cash flow to the starting balance.
+  if (homeValue > 0 && effectiveHomeSaleAge < retireAge) {
+    cashBal += homeSaleNetProceeds;
+  }
+  if (peruPropertyCost > 0 && peruPropertyAge > 0 && peruPropertyAge < retireAge) {
+    cashBal = Math.max(0, cashBal - peruPropertyCost);
+  }
 
   for (let age = retireAge; age <= MAX_PROJECTION_AGE; age++) {
     const spAge = spouseAge + (age - currentAge);
     const ss = age >= ssClaimAge ? primarySS : 0;
     const spSS = age >= spouseSsClaimAge ? spouseSS : 0;
     const totalSS = ss + spSS;
-    const homeSale = age === homeSaleYear ? homeSaleGain : 0;
     const rmd = calcRMD(age, tradBal);
+
+    // ─── Home sale in this year ──────────────────────────────────
+    const isHomeSaleYear = age === effectiveHomeSaleAge && (homeValue > 0 || homeSaleGain > 0);
+    const homeSaleTaxableGain = isHomeSaleYear ? homeSaleGainAmount : 0;
+    const homeSaleProceeds = isHomeSaleYear ? homeSaleNetProceeds : 0;
+
+    // ─── Peru property purchase ──────────────────────────────────
+    const peruPurchase = peruPropertyCost > 0 && age === peruPropertyAge ? peruPropertyCost : 0;
+
+    // ─── Cash earnings (interest/investment income on home sale savings) ──
+    // This is what a HYSA or investment account generates each year.
+    // Visible as potential discretionary income (travel, etc.).
+    const cashEarnings = Math.round(cashBal * ANNUAL_GROWTH_RATE);
 
     // ─── Health insurance cost ──────────────────────────────────
     // Each spouse transitions to Medicare at their own age 65
@@ -90,11 +145,14 @@ export function runProjection(inputs) {
     // ─── Expenses with inflation ────────────────────────────
     const yearsFromRetirement = age - retireAge;
     const inflatedSpending = monthlySpending * 12 * Math.pow(1 + inflationRate, yearsFromRetirement);
-    const totalExpenses = inflatedSpending + annualHealthCost;
+    const inflatedTravel = annualTravelBudget * Math.pow(1 + inflationRate, yearsFromRetirement);
+    const totalExpenses = inflatedSpending + inflatedTravel + annualHealthCost;
 
     // ─── Roth conversion: fill target bracket ───────────────────
     const stdDed = getStandardDeduction(filing, age, spAge);
-    const baseIncome = annualPension + investmentIncome + homeSale;
+    // Include home sale taxable gain in base income for bracket calculation
+    // (a big gain year = don't convert, brackets are already filled)
+    const baseIncome = annualPension + investmentIncome + homeSaleTaxableGain;
     const baseTaxable = Math.max(0, baseIncome + calcSSTaxable(totalSS, baseIncome, filing) - stdDed);
 
     let conversionRoom = 0;
@@ -111,11 +169,11 @@ export function runProjection(inputs) {
     // Separate ordinary income from home sale gain (taxed at LTCG rates)
     const ordinaryIncome = annualPension + traditionalWithdrawal + investmentIncome;
     // Home sale gain still counts toward provisional income for SS taxation
-    const ssTaxable = calcSSTaxable(totalSS, ordinaryIncome + homeSale, filing);
-    const agi = ordinaryIncome + homeSale + ssTaxable;
+    const ssTaxable = calcSSTaxable(totalSS, ordinaryIncome + homeSaleTaxableGain, filing);
+    const agi = ordinaryIncome + homeSaleTaxableGain + ssTaxable;
     const ordinaryTaxable = Math.max(0, ordinaryIncome + ssTaxable - stdDed);
     const ordinaryFedTax = calcFederalTax(ordinaryTaxable, filing);
-    const homeSaleTax = calcCapitalGainsTax(homeSale, ordinaryTaxable, filing);
+    const homeSaleTax = calcCapitalGainsTax(homeSaleTaxableGain, ordinaryTaxable, filing);
     const federalTax = ordinaryFedTax + homeSaleTax;
     const taxWithoutConversion =
       rothConversion > 0 ? calcFederalTax(Math.max(0, ordinaryTaxable - rothConversion), filing) : federalTax;
@@ -126,24 +184,43 @@ export function runProjection(inputs) {
     const irmaaYearData = years.find((y) => y.age === irmaaAge);
     const irmaaIncome = irmaaYearData ? irmaaYearData.agi : agi;
     const irmaa = age >= 65 ? calcIRMAA(irmaaIncome, filing) : 0;
-    const stateTax = calcStateTax(selectedState, annualPension, totalSS, rmd, investmentIncome + homeSale, age);
+    const stateTax = calcStateTax(
+      selectedState,
+      annualPension,
+      totalSS,
+      rmd,
+      investmentIncome + homeSaleTaxableGain,
+      age,
+    );
 
-    // ─── Roth withdrawal to cover living expenses ───────────────
-    const totalGrossIncome = annualPension + totalSS + traditionalWithdrawal + investmentIncome + homeSale;
-    const afterTaxIncome = totalGrossIncome - federalTax - stateTax - irmaa;
-    const rothNeeded = Math.max(0, totalExpenses - afterTaxIncome);
+    // ─── Cover living expenses from income + savings ─────────────
+    // Spendable income EXCLUDES home sale gain (those proceeds go to cashBal).
+    // The home sale TAX still comes out of income, which increases the shortfall
+    // drawn from cash — correctly modeling the tax cost against the proceeds.
+    const spendableGrossIncome = annualPension + totalSS + traditionalWithdrawal + investmentIncome;
+    const afterTaxIncome = spendableGrossIncome - federalTax - stateTax - irmaa;
+
+    // Draw order: cash first (already-taxed), then Roth (tax-free growth)
+    const shortfall = Math.max(0, totalExpenses - afterTaxIncome);
+    const cashWithdrawal = Math.min(shortfall, cashBal);
+    const rothNeeded = shortfall - cashWithdrawal;
     const rothWithdrawal = Math.min(rothNeeded, rothBal);
 
-    const savingsDepleted = tradBal <= 0 && rothBal <= 0;
+    const savingsDepleted = tradBal <= 0 && rothBal <= 0 && cashBal <= 0;
     const netMonthlyIncome = savingsDepleted
       ? (afterTaxIncome - totalExpenses) / 12
-      : (afterTaxIncome + rothWithdrawal - totalExpenses) / 12;
+      : (afterTaxIncome + cashWithdrawal + rothWithdrawal - totalExpenses) / 12;
 
     // ─── Update balances ────────────────────────────────────────
+    // Home sale proceeds enter cash balance; Peru purchase deducted
+    cashBal = Math.max(0, (cashBal + homeSaleProceeds - peruPurchase - cashWithdrawal) * (1 + ANNUAL_GROWTH_RATE));
     tradBal = Math.max(0, (tradBal - traditionalWithdrawal) * (1 + ANNUAL_GROWTH_RATE));
     rothBal = Math.max(0, (rothBal - rothWithdrawal + rothConversion) * (1 + ANNUAL_GROWTH_RATE));
 
     const totalTax = federalTax + stateTax + irmaa;
+
+    // For display: totalGrossIncome includes everything for AGI/informational purposes
+    const totalGrossIncome = annualPension + totalSS + traditionalWithdrawal + investmentIncome + homeSaleTaxableGain;
 
     years.push({
       age,
@@ -156,8 +233,12 @@ export function runProjection(inputs) {
       rothConversion,
       traditionalWithdrawal,
       rothWithdrawal,
+      cashWithdrawal,
       investmentIncome,
-      homeSale,
+      homeSaleTaxableGain,
+      homeSaleProceeds,
+      peruPurchase,
+      totalGrossIncome,
       agi,
       taxableIncome,
       federalTax,
@@ -168,6 +249,7 @@ export function runProjection(inputs) {
       marginalRate,
       tradBal,
       rothBal,
+      cashBal,
       standardDeduction: stdDed,
       conversionRoom,
       conversionTaxCost,
@@ -176,6 +258,9 @@ export function runProjection(inputs) {
       netMonthlyIncome,
       savingsDepleted,
       inflatedSpending,
+      inflatedTravel,
+      cashEarnings,
+      peruRentalIncome,
     });
   }
 
@@ -206,6 +291,10 @@ export function summarizeProjection(projection, inputs) {
   const optimizedTax = projection.reduce((s, y) => s + y.totalTax, 0);
   const taxSavingsVsBaseline = Math.max(0, baselineTax - optimizedTax);
 
+  // Baseline depletion for comparison
+  const baselineDepletion = baselineProjection.find((y) => y.savingsDepleted);
+  const baselineDepletionAge = baselineDepletion ? baselineDepletion.age : null;
+
   return {
     totalFederalTax,
     totalStateTax,
@@ -214,8 +303,51 @@ export function summarizeProjection(projection, inputs) {
     avgEffectiveRate,
     totalAllTax: totalFederalTax + totalStateTax + totalIRMAA,
     depletionAge,
+    baselineDepletionAge,
     retirementMonthlyIncome,
     totalHealthInsuranceCost,
     taxSavingsVsBaseline,
+  };
+}
+
+/**
+ * Binary search for the maximum monthly spending that depletes all
+ * savings right around the target end age.
+ *
+ * Returns { maxMonthlySpending, depletionAge } — the highest spending
+ * level where money runs out within 1 year of the target.
+ */
+export function solveSpendDown(inputs) {
+  const { targetEndAge = 90, retireAge } = inputs;
+  if (!targetEndAge || targetEndAge <= retireAge) return null;
+
+  let lo = 0;
+  let hi = 30000; // $30K/mo ceiling
+  let bestSpending = 0;
+  let bestDepletion = null;
+
+  // 20 iterations of binary search = precision within ~$1/mo
+  for (let i = 0; i < 20; i++) {
+    const mid = Math.round((lo + hi) / 2);
+    const proj = runProjection({ ...inputs, monthlySpending: mid });
+    const depleted = proj.find((y) => y.savingsDepleted);
+    const depAge = depleted ? depleted.age : null;
+
+    if (depAge === null || depAge > targetEndAge) {
+      // Money lasts too long — can spend more
+      lo = mid;
+      bestSpending = mid;
+      bestDepletion = depAge;
+    } else if (depAge <= targetEndAge) {
+      // Runs out too soon — spend less
+      hi = mid;
+      bestSpending = mid;
+      bestDepletion = depAge;
+    }
+  }
+
+  return {
+    maxMonthlySpending: bestSpending,
+    depletionAge: bestDepletion,
   };
 }

@@ -54,3 +54,12 @@ export const LTCG_BRACKETS_MFJ = [
   { max: 600050, rate: 0.15 },
   { max: Infinity, rate: 0.2 },
 ];
+
+// Section 121 Home Sale Exclusion
+export const HOME_SALE_EXCLUSION = {
+  single: 250000,
+  mfj: 500000,
+};
+
+// Typical real estate selling costs (agent commissions, closing costs)
+export const HOME_SELLING_COST_RATE = 0.06;
