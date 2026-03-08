@@ -8,6 +8,7 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
 
   return (
     <div>
+      {/* Plain-language explanation */}
       <div
         style={{
           background: "#fffbeb",
@@ -16,30 +17,110 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
           padding: 13,
           marginBottom: 16,
           fontSize: 13,
-          lineHeight: 1.6,
+          lineHeight: 1.7,
         }}
       >
-        <strong>Strategy:</strong>{" "}
-        {conversionStrategy === "none"
-          ? "No conversions — change in sidebar to see impact!"
-          : `Fill the ${conversionStrategy === "fill12" ? "12%" : "22%"} bracket each year. Moves traditional TSP to Roth at low rates before SS and RMDs stack up.`}
+        {conversionStrategy === "none" ? (
+          <span>
+            <strong>No tax strategy selected.</strong> Change "Roth Strategy" in the sidebar to see how moving money
+            from your pre-tax TSP to a tax-free TSP (Roth) could save you money.
+          </span>
+        ) : (
+          <span>
+            <strong>What this does:</strong> Between ages {retireAge} and {ssClaimAge - 1}, before Social Security
+            starts, your income is low. The app moves money from your pre-tax TSP into a tax-free (Roth) account each
+            year — just enough to stay in a low tax bracket ({conversionStrategy === "fill12" ? "12%" : "22%"}). You pay
+            a small tax now, but avoid paying a much bigger tax later when required withdrawals at age 73 stack on top
+            of Social Security and pensions.
+            {summary.taxSavingsVsBaseline > 0 && (
+              <span style={{ color: "#059669", fontWeight: 600 }}>
+                {" "}
+                This saves an estimated <strong>{fmt(summary.taxSavingsVsBaseline)}</strong> in lifetime taxes.
+              </span>
+            )}
+          </span>
+        )}
       </div>
 
+      {conversionStrategy !== "none" && (
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
+          <div
+            style={{
+              flex: 1,
+              minWidth: 200,
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: 12,
+              padding: 14,
+            }}
+          >
+            <div
+              style={{ fontSize: 11, fontWeight: 700, color: "#dc2626", marginBottom: 8, textTransform: "uppercase" }}
+            >
+              If You Do Nothing
+            </div>
+            <div style={{ fontSize: 13, color: "#475569" }}>
+              Lifetime Tax: <strong>{fmt((summary.totalAllTax || 0) + (summary.taxSavingsVsBaseline || 0))}</strong>
+            </div>
+            <div style={{ fontSize: 13, color: "#475569" }}>
+              Money Lasts To:{" "}
+              <strong>{summary.baselineDepletionAge ? `Age ${summary.baselineDepletionAge}` : "92+"}</strong>
+            </div>
+          </div>
+          <div
+            style={{
+              flex: 1,
+              minWidth: 200,
+              background: "#f0fdf4",
+              border: "1px solid #bbf7d0",
+              borderRadius: 12,
+              padding: 14,
+            }}
+          >
+            <div
+              style={{ fontSize: 11, fontWeight: 700, color: "#16a34a", marginBottom: 8, textTransform: "uppercase" }}
+            >
+              With This Strategy
+            </div>
+            <div style={{ fontSize: 13, color: "#475569" }}>
+              Lifetime Tax: <strong>{fmt(summary.totalAllTax || 0)}</strong>
+            </div>
+            <div style={{ fontSize: 13, color: "#475569" }}>
+              Money Lasts To: <strong>{summary.depletionAge ? `Age ${summary.depletionAge}` : "92+"}</strong>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-        <Card title="Total Converted" value={fmt(summary.totalConversions)} color="#7c3aed" />
+        <Card title="Total Moved to Tax-Free" value={fmt(summary.totalConversions)} color="#7c3aed" />
         <Card
           title="Best Window"
           value={`Ages ${retireAge}–${ssClaimAge - 1}`}
-          subtitle="Before SS starts"
+          subtitle="Before Social Security starts"
           color="#d97706"
         />
-        <Card title="Trad at 73" value={fmt(age73Data.tradBal || 0)} subtitle="Lower = smaller RMDs" color="#dc2626" />
-        <Card title="Roth at 73" value={fmt(age73Data.rothBal || 0)} subtitle="Tax-free" color="#22c55e" />
+        <Card
+          title="TSP Pre-Tax at 73"
+          value={fmt(age73Data.tradBal || 0)}
+          subtitle="Lower = less forced withdrawal"
+          color="#dc2626"
+        />
+        <Card
+          title="TSP Tax-Free at 73"
+          value={fmt(age73Data.rothBal || 0)}
+          subtitle="Never taxed again"
+          color="#22c55e"
+        />
       </div>
 
-      {/* Conversions + marginal rate chart */}
+      {/* Conversions + tax rate chart */}
       <div style={{ background: "#fff", borderRadius: 12, padding: 16, border: "1px solid #e2e8f0", marginBottom: 16 }}>
-        <h3 style={{ margin: "0 0 12px", fontSize: 14, fontWeight: 700 }}>Conversions & Marginal Rate</h3>
+        <h3 style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700 }}>How Much Gets Moved Each Year</h3>
+        <div style={{ fontSize: 10, color: "#64748b", marginBottom: 12 }}>
+          Purple bars = money moved from pre-tax → tax-free · Red bars = required withdrawals at 73+ · Yellow line =
+          your tax rate
+        </div>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={projection.filter((y) => y.age <= 80)}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -56,13 +137,13 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
               labelFormatter={(l) => "Age " + l}
             />
             <Legend wrapperStyle={{ fontSize: 10 }} />
-            <Bar yAxisId="l" dataKey="rothConversion" name="Roth Conversion" fill="#7c3aed" />
-            <Bar yAxisId="l" dataKey="rmd" name="RMD" fill="#ef4444" />
+            <Bar yAxisId="l" dataKey="rothConversion" name="Moved to Tax-Free" fill="#7c3aed" />
+            <Bar yAxisId="l" dataKey="rmd" name="Required Withdrawal (73+)" fill="#ef4444" />
             <Line
               yAxisId="r"
               type="stepAfter"
               dataKey="marginalRate"
-              name="Marginal Rate"
+              name="Your Tax Rate"
               stroke="#f59e0b"
               strokeWidth={2}
               dot={false}
@@ -73,17 +154,36 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
 
       {/* Detail table */}
       <div style={{ background: "#fff", borderRadius: 12, padding: 16, border: "1px solid #e2e8f0" }}>
-        <h3 style={{ margin: "0 0 10px", fontSize: 14, fontWeight: 700 }}>Conversion Detail</h3>
+        <h3 style={{ margin: "0 0 4px", fontSize: 14, fontWeight: 700 }}>Year-by-Year Breakdown</h3>
+        <div style={{ fontSize: 10, color: "#64748b", marginBottom: 10 }}>
+          "Room" = how much you could move before hitting the next tax bracket
+        </div>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", fontSize: 10, fontFamily: "'DM Mono', monospace" }}>
             <thead>
               <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
-                {["Age", "Base Taxable", "Room", "Converted", "Rate", "Tax Cost", "Cumulative"].map((h) => (
+                {[
+                  { label: "Age", title: "Your age" },
+                  { label: "Already Taxable", title: "Income already taxed before any conversion" },
+                  { label: "Room", title: "How much you can convert before hitting the next bracket" },
+                  { label: "Moved", title: "Amount moved from pre-tax to tax-free" },
+                  { label: "Tax Rate", title: "Tax bracket you're in" },
+                  { label: "Tax Cost", title: "Extra tax you pay this year for the conversion" },
+                  { label: "Total Moved", title: "Running total of all conversions so far" },
+                ].map((h) => (
                   <th
-                    key={h}
-                    style={{ padding: "6px 4px", textAlign: "right", fontWeight: 600, color: "#64748b", fontSize: 8 }}
+                    key={h.label}
+                    title={h.title}
+                    style={{
+                      padding: "6px 4px",
+                      textAlign: "right",
+                      fontWeight: 600,
+                      color: "#64748b",
+                      fontSize: 8,
+                      cursor: "help",
+                    }}
                   >
-                    {h}
+                    {h.label}
                   </th>
                 ))}
               </tr>
@@ -107,7 +207,7 @@ export default function RothTab({ projection, summary, retireAge, ssClaimAge, co
                       </td>
                       <td style={{ padding: "4px", textAlign: "right" }}>{fmtPct(y.marginalRate)}</td>
                       <td style={{ padding: "4px", textAlign: "right", color: "#dc2626" }}>
-                        {fmt(y.rothConversion * y.marginalRate)}
+                        {fmt(y.conversionTaxCost)}
                       </td>
                       <td style={{ padding: "4px", textAlign: "right", fontWeight: 600 }}>{fmt(cumulative)}</td>
                     </tr>

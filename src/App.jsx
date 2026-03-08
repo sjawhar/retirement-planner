@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { DEFAULTS } from "./constants";
-import { readStateFromURL, buildShareURL, syncURLToState, fmt, fmtPct } from "./utils";
-import { runProjection, summarizeProjection } from "./utils/projection";
+import { readStateFromURL, buildShareURL, syncURLToState, fmt } from "./utils";
+import { runProjection, summarizeProjection, solveSpendDown } from "./utils/projection";
 import Sidebar from "./components/Sidebar";
 import { TabButton, Card, Toast } from "./components/ui";
 import YearPlanTab from "./components/tabs/YearPlanTab";
@@ -24,7 +24,8 @@ export default function App() {
 
   // ─── Core calculations ────────────────────────────────────────────
   const projection = useMemo(() => runProjection(inputs), [inputs]);
-  const summary = useMemo(() => summarizeProjection(projection), [projection]);
+  const summary = useMemo(() => summarizeProjection(projection, inputs), [projection, inputs]);
+  const spendDown = useMemo(() => solveSpendDown(inputs), [inputs]);
 
   // ─── Actions ──────────────────────────────────────────────────────
   const handleShare = useCallback(() => {
@@ -79,7 +80,7 @@ export default function App() {
           </div>
           <div>
             <h1 className="header-title" style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>
-              Federal Retirement Tax Planner
+              Federal Retirement Readiness Planner
             </h1>
             <p className="header-sub" style={{ margin: 0, fontSize: 11, opacity: 0.7 }}>
               FERS · TSP · Social Security · Home Sale · State Taxes
@@ -171,27 +172,35 @@ export default function App() {
         >
           {/* Summary cards */}
           <div className="summary-cards" style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
+            {spendDown && (
+              <Card
+                title="You Can Spend"
+                value={`$${spendDown.maxMonthlySpending.toLocaleString()}/mo`}
+                subtitle={`And run out right around age ${inputs.targetEndAge}`}
+                color="#2563eb"
+              />
+            )}
             <Card
-              title="Lifetime Fed Tax"
-              value={fmt(summary.totalFederalTax)}
-              subtitle={`Ages ${inputs.retireAge}–92`}
+              title="Money Lasts To"
+              value={summary.depletionAge ? `Age ${summary.depletionAge}` : "92+"}
+              subtitle={summary.depletionAge ? "At your current spending level" : "At current spending — you have room"}
+              color={summary.depletionAge && summary.depletionAge < 85 ? "#dc2626" : "#22c55e"}
             />
             <Card
-              title="Lifetime State Tax"
-              value={fmt(summary.totalStateTax)}
-              subtitle={inputs.selectedState}
-              color="#059669"
-            />
-            <Card title="Avg Effective Rate" value={fmtPct(summary.avgEffectiveRate)} color="#7c3aed" />
-            <Card
-              title="Total Roth Conversions"
-              value={fmt(summary.totalConversions)}
+              title="Tax Strategy Saves"
+              value={fmt(summary.taxSavingsVsBaseline)}
               subtitle={
                 inputs.conversionStrategy === "none"
-                  ? "None"
-                  : `Fill ${inputs.conversionStrategy === "fill12" ? "12%" : "22%"}`
+                  ? "Turn on strategy in sidebar to see savings"
+                  : "vs. doing nothing \u2014 pay 10-12% now instead of 22%+ later"
               }
               color="#d97706"
+            />
+            <Card
+              title="Health Insurance"
+              value={fmt(summary.totalHealthInsuranceCost)}
+              subtitle={`Total cost ages ${inputs.retireAge}\u201365, before Medicare`}
+              color="#7c3aed"
             />
           </div>
 
@@ -208,17 +217,17 @@ export default function App() {
               overflowX: "auto",
             }}
           >
-            <TabButton active={tab === "yearplan"} onClick={() => setTab("yearplan")} icon="📅">
-              Year-by-Year
+            <TabButton active={tab === "yearplan"} onClick={() => setTab("yearplan")} icon="\uD83D\uDCC5">
+              Timeline
             </TabButton>
-            <TabButton active={tab === "roth"} onClick={() => setTab("roth")} icon="🔄">
-              Roth Optimizer
+            <TabButton active={tab === "roth"} onClick={() => setTab("roth")} icon="\uD83D\uDD04">
+              Tax Strategy
             </TabButton>
-            <TabButton active={tab === "states"} onClick={() => setTab("states")} icon="🗺️">
-              State Compare
+            <TabButton active={tab === "states"} onClick={() => setTab("states")} icon="\uD83D\uDDFA\uFE0F">
+              Where to Live
             </TabButton>
-            <TabButton active={tab === "ss"} onClick={() => setTab("ss")} icon="🏦">
-              SS Timing
+            <TabButton active={tab === "ss"} onClick={() => setTab("ss")} icon="\uD83C\uDFE6">
+              Social Security
             </TabButton>
           </div>
 
@@ -233,8 +242,15 @@ export default function App() {
               conversionStrategy={inputs.conversionStrategy}
             />
           )}
-          {tab === "states" && <StateTab state={inputs} />}
-          {tab === "ss" && <SSTab ssPIA={inputs.ssPIA} ssClaimAge={inputs.ssClaimAge} />}
+          {tab === "states" && <StateTab state={inputs} projection={projection} />}
+          {tab === "ss" && (
+            <SSTab
+              ssPIA={inputs.ssPIA}
+              ssClaimAge={inputs.ssClaimAge}
+              spouseSsPIA={inputs.spouseSsPIA}
+              spouseSsClaimAge={inputs.spouseSsClaimAge}
+            />
+          )}
 
           {/* Disclaimer */}
           <div

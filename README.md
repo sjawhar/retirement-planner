@@ -1,18 +1,21 @@
-# Federal Retirement Tax Planner
+# Federal Retirement Readiness Planner
 
-An interactive, client-side tax planning tool for federal employees (FERS/CSRS) approaching retirement. Models year-by-year withdrawal strategies across TSP, pension, Social Security, and home sale proceeds to minimize lifetime federal and state income taxes.
+An interactive, client-side retirement readiness tool for federal employees (FERS/CSRS) and their spouses. "When can I retire and what will I have to live on?" This tool models year-by-year income, taxes, and account balances to determine if your savings will last through your retirement.
 
 **[Live Demo →](#)** _(replace with your GitHub Pages URL)_
 
 ## Features
 
-- **Year-by-Year Withdrawal Plan** — Projects income, taxes, and account balances from retirement through age 92
-- **Roth Conversion Optimizer** — Models bracket-filling strategies (12% or 22%) to minimize future RMD tax exposure
-- **State Tax Comparison** — Side-by-side analysis of 24 states for federal retirees (pension, SS, and TSP treatment)
-- **Social Security Timing** — Cumulative benefit curves and break-even analysis for claiming at 62, 64, 67, and 70
-- **Shareable Scenarios** — All inputs encode into URL parameters; bookmark or share specific configurations
-- **Mobile Responsive** — Works on phone, tablet, and desktop
-- **Fully Client-Side** — No server, no database, no tracking
+- **Retirement Readiness Dashboard** — Shows savings depletion age, monthly after-tax income, and health insurance costs.
+- **Household Income Modeling** — Models two pensions and two Social Security incomes with independent claiming ages.
+- **Health Insurance Planning** — Models FEHB, ACA marketplace, or employer coverage; transitions to Medicare at 65 per spouse.
+- **Inflation-Adjusted Projections** — Spending grows with inflation (default 2.5%) to reflect real-world purchasing power.
+- **Withdrawal Strategy** — Roth conversion optimizer with before/after comparison to minimize lifetime tax exposure.
+- **Where to Retire** — State comparison with residency notes for part-time residents and state-specific tax treatment.
+- **Social Security Timing** — Combined household Social Security benefits at different claiming ages.
+- **Shareable Scenarios** — All inputs encode into URL parameters; bookmark or share specific configurations.
+- **Mobile Responsive** — Works on phone, tablet, and desktop.
+- **Fully Client-Side** — No server, no database, no tracking.
 
 ## Quick Start
 
@@ -57,13 +60,15 @@ base: "/your-repo-name/",
 │   │   ├── index.js              # Barrel export
 │   │   ├── defaults.js           # Default inputs, URL param map, growth rate
 │   │   ├── federalTax.js         # Brackets, standard deduction, SS thresholds
+│   │   ├── healthInsurance.js    # Medicare start age, monthly cost, insurance type defaults
 │   │   ├── irmaa.js              # Medicare surcharge thresholds
 │   │   ├── rmd.js                # Required Minimum Distribution divisor table
-│   │   └── stateTax.js           # State-by-state tax profiles (24 states)
+│   │   └── stateTax.js           # State-by-state tax profiles
 │   │
 │   ├── utils/                    # Calculation engines
 │   │   ├── index.js              # Barrel export
 │   │   ├── federalTax.js         # Progressive bracket math, SS taxable calc
+│   │   ├── healthInsurance.js    # Medicare transition and cost logic
 │   │   ├── stateTax.js           # State tax with exemptions/deductions
 │   │   ├── irmaa.js              # IRMAA tier lookup
 │   │   ├── rmd.js                # RMD calculator
@@ -90,24 +95,26 @@ base: "/your-repo-name/",
 
 ## Tax Logic
 
-All tax calculations live in `src/utils/` with constants in `src/constants/`. This separation makes it easy to update numbers annually without touching UI code.
+All tax and insurance calculations live in `src/utils/` with constants in `src/constants/`. This separation makes it easy to update numbers annually without touching UI code.
 
-| File                | What it calculates                                                              |
-| ------------------- | ------------------------------------------------------------------------------- |
-| `federalTax.js`     | Progressive bracket tax, marginal rates, SS taxable portion, standard deduction |
-| `stateTax.js`       | State income tax with pension/SS/TSP exemptions per state profile               |
-| `irmaa.js`          | Medicare Part B surcharge tiers                                                 |
-| `rmd.js`            | Required Minimum Distributions from the Uniform Lifetime Table                  |
-| `socialSecurity.js` | Benefit estimates at different claiming ages, cumulative comparison             |
-| `projection.js`     | **Core engine** — runs the full year-by-year model combining all of the above   |
+| File                 | What it calculates                                                              |
+| -------------------- | ------------------------------------------------------------------------------- |
+| `federalTax.js`      | Progressive bracket tax, marginal rates, SS taxable portion, standard deduction |
+| `healthInsurance.js` | Medicare start age, monthly cost, insurance type defaults                       |
+| `stateTax.js`        | State income tax with pension/SS/TSP exemptions per state profile               |
+| `irmaa.js`           | Medicare Part B surcharge tiers                                                 |
+| `rmd.js`             | Required Minimum Distributions from the Uniform Lifetime Table                  |
+| `socialSecurity.js`  | Benefit estimates at different claiming ages, cumulative comparison             |
+| `projection.js`      | **Core engine** — runs the full year-by-year model combining all of the above   |
 
 ## Annual Updates
 
-When the IRS publishes new numbers (typically October/November for the following tax year):
+When the IRS or CMS publishes new numbers (typically October/November for the following tax year):
 
 1. **Federal brackets** → `src/constants/federalTax.js` — update `BRACKETS_SINGLE`, `BRACKETS_MFJ`, `STANDARD_DEDUCTION`
-2. **IRMAA thresholds** → `src/constants/irmaa.js` — update threshold arrays
-3. **State tax changes** → `src/constants/stateTax.js` — update rates, exemption amounts, or add new states
+2. **Health Insurance** → `src/constants/healthInsurance.js` — update `MEDICARE_MONTHLY_COST` and premium defaults
+3. **IRMAA thresholds** → `src/constants/irmaa.js` — update threshold arrays
+4. **State tax changes** → `src/constants/stateTax.js` — update rates, exemption amounts, or add new states
 
 ### Adding a State
 
@@ -137,25 +144,31 @@ Edit `DEFAULT_COMPARE_STATES` in `src/constants/stateTax.js`.
 
 All inputs auto-save to the URL. Only non-default values are included to keep URLs short.
 
-| Param | Field                            | Default  |
-| ----- | -------------------------------- | -------- |
-| `a`   | Current age                      | 58       |
-| `r`   | Retirement age                   | 60       |
-| `s`   | Spouse's age                     | 56       |
-| `f`   | Filing status                    | mfj      |
-| `p`   | FERS pension (annual)            | 50000    |
-| `tt`  | TSP traditional balance          | 600000   |
-| `tr`  | TSP Roth balance                 | 100000   |
-| `sp`  | SS PIA (monthly)                 | 2400     |
-| `sc`  | SS claim age                     | 67       |
-| `hg`  | Home sale gain (above exclusion) | 0        |
-| `hy`  | Home sale age                    | 62       |
-| `ii`  | Annual investment income         | 5000     |
-| `le`  | Annual living expenses           | 80000    |
-| `st`  | State                            | Virginia |
-| `cs`  | Conversion strategy              | fill12   |
+| Param | Field                            | Default |
+| ----- | -------------------------------- | ------- |
+| `a`   | Current age                      | 57      |
+| `r`   | Retirement age                   | 60      |
+| `s`   | Spouse's age                     | 56      |
+| `f`   | Filing status                    | mfj     |
+| `p`   | Your monthly pension             | 850     |
+| `sp2` | Spouse's monthly pension         | 800     |
+| `tt`  | TSP Traditional balance          | 600000  |
+| `tr`  | TSP Roth balance                 | 100000  |
+| `sp`  | Your SS PIA (monthly)            | 2400    |
+| `sc`  | Your SS claim age                | 67      |
+| `ssp` | Spouse's SS PIA (monthly)        | 0       |
+| `ssc` | Spouse's SS claim age            | 67      |
+| `hg`  | Home sale gain (above exclusion) | 0       |
+| `hy`  | Home sale age                    | 62      |
+| `ii`  | Annual investment income         | 5000    |
+| `ms`  | Monthly spending                 | 5000    |
+| `st`  | State                            | Utah    |
+| `cs`  | Conversion strategy              | fill12  |
+| `hi`  | Health insurance type            | fehb    |
+| `hc`  | Monthly insurance cost           | 800     |
+| `ir`  | Inflation rate                   | 0.025   |
 
-**Example:** `?p=55000&tt=800000&sc=70&st=Pennsylvania&cs=fill22`
+**Example:** `?p=1200&sp2=1000&tt=800000&sc=70&st=Utah&cs=fill22&ms=6000`
 
 ## Tech Stack
 

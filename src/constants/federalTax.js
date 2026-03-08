@@ -40,3 +40,26 @@ export const SS_PROVISIONAL_THRESHOLDS = {
   single: { lower: 25000, upper: 34000 },
   mfj: { lower: 32000, upper: 44000 },
 };
+
+// 2025 Long-Term Capital Gains brackets
+// Rate depends on total taxable income (ordinary + gains)
+export const LTCG_BRACKETS_SINGLE = [
+  { max: 48350, rate: 0 },
+  { max: 533400, rate: 0.15 },
+  { max: Infinity, rate: 0.2 },
+];
+
+export const LTCG_BRACKETS_MFJ = [
+  { max: 96700, rate: 0 },
+  { max: 600050, rate: 0.15 },
+  { max: Infinity, rate: 0.2 },
+];
+
+// Section 121 Home Sale Exclusion
+export const HOME_SALE_EXCLUSION = {
+  single: 250000,
+  mfj: 500000,
+};
+
+// Typical real estate selling costs (agent commissions, closing costs)
+export const HOME_SELLING_COST_RATE = 0.06;
